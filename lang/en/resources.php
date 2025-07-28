@@ -463,7 +463,7 @@ return [
                 'day' => 'Day',
                 'time' => 'Time',
                 'one_day_before' => 'Limit to "the day before" only',
-                'time_before' => 'Maximum time before the slot to cancel',
+                'time_before' => 'Maximum time before the slot to register or unregister',
                 'code' => 'Course',
                 'intitule' => 'Title',
             ],

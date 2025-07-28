@@ -461,7 +461,7 @@ return [
                 'day' => 'Jour',
                 'time' => 'Heure',
                 'one_day_before' => 'Limiter à "la veille" uniquement',
-                'time_before' => 'Délai maximal avant un créneau pour annuler',
+                'time_before' => 'Délai maximal avant un créneau pour  s\'inscrire ou se désinscrire',
                 'max_student_for_1_tutor' => "Nombre maximum d'élèves pour 1 tuteur",
                 'max_student_for_2_tutors' => "Nombre maximum d'élèves pour 2 tuteurs",
                 'code' => 'UV',
