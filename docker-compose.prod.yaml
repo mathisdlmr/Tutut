@@ -1,0 +1,129 @@
+---
+services:
+  traefik:
+    image: traefik:latest
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /home/docker/traefik/traefik.yml:/traefik.yml
+      - /home/docker/traefik/acme.json:/acme.json
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    environment:
+      - PUID=112
+      - PGID=117
+      - TZ=Europe/Paris
+      - TRANSMISSION_WEB_HOME=/combustion-release/
+    volumes:
+      - /home/docker/transmission/config:/config
+      - /home/docker/transmission/downloads/:/downloads
+      - /home/docker/transmission/watch:/watch
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    restart: unless-stopped
+
+  webdefault:
+    image: nginx:latest
+    container_name: webdefault
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.webdefault.rule=Host(`bach.stbo.fr`)
+      - traefik.http.routers.webdefault.entrypoints=web,websecure
+      - traefik.http.routers.webdefault.tls.certresolver=letsencrypt
+      - traefik.docker.network=traefik
+    volumes:
+      - /home/docker/nginx/html:/usr/share/nginx/html/:ro
+    restart: unless-stopped
+    networks:
+      - webdefault
+      - traefik
+
+  tututweb:
+    image: nginx:latest
+    container_name: tututweb
+    depends_on:
+      - php
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tututweb.rule=Host(`tutut.stbo.fr`)
+      - traefik.http.routers.tututweb.entrypoints=web,websecure
+      - traefik.http.routers.tututweb.tls.certresolver=letsencrypt
+      - traefik.docker.network=traefik
+    volumes:
+      - /home/docker/tutut/nginx/conf.d:/etc/nginx/conf.d
+      - /home/docker/tutut/public:/var/www/html/public:ro
+    restart: unless-stopped
+    networks:
+      - tutut
+      - traefik
+
+  php:
+    image: docker.io/mathisdlmr/tutut
+    depends_on:
+      - tutut-db
+    links:
+      - tutut-db
+    expose:
+      - 9000
+    env_file:
+      - /home/docker/tutut/.env.prod
+    volumes:
+      - /home/docker/tutut/php/etc:/usr/local/etc
+      - /home/docker/tutut/.env.prod:/var/www/html/.env:ro
+    networks:
+      - tutut
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    ports:
+      - 8080:80
+    links:
+      - tutut-db
+    restart: unless-stopped
+    environment:
+      PMA_HOST: tutut-db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      PMA_ABSOLUTE_URI: "https://tutut.stbo.fr/phpmyadmin/"
+    networks:
+      - tutut
+
+  tutut-db:
+    image: mysql:latest
+    container_name: tutut-db
+    environment:
+      MYSQL_ROOT_PASSWORD: tutut
+      MYSQL_DATABASE: tutut
+      MYSQL_USER: tutut
+      MYSQL_PASSWORD: tutut
+    volumes:
+      - /home/docker/tutut/db:/var/lib/mysql
+    restart: unless-stopped
+    networks:
+      - tutut
+
+networks:
+    webdefault:
+      name: webdefault
+    tutut:
+      name: tutut
+    traefik:
+      name: traefik
+
+
+
+
+docker compose down -v
+docker volume rm $(docker volume ls -qf name=tutut_app)
+docker pull docker.io/mathisdlmr/tutut
+docker compose up -d

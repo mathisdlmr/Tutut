@@ -39,6 +39,7 @@ use App\Filament\Widgets\TuteeCreneauxWidget;
 use App\Filament\Widgets\TutorCreneauxTableWidget;
 use App\Http\Middleware\EnsureRgpdAccepted;
 use App\Models\Semestre;
+use App\Http\Middleware\FilamentAutoAuth;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -110,7 +111,7 @@ class AdminPanelProvider extends PanelProvider
                 EnsureRgpdAccepted::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                FilamentAutoAuth::class,
             ]);
     }
 }

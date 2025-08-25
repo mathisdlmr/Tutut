@@ -34,4 +34,15 @@ enum Roles : string
     {
         return $this === self::Tutee;
     }
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::Administrator => 'Administrateur',
+            self::EmployedPrivilegedTutor => 'Tuteur privilégié rémunéré',
+            self::EmployedTutor => 'Tuteur rémunéré',
+            self::Tutor => 'Tuteur bénévole',
+            self::Tutee => 'Tutoré',
+        };
+    }
 }
