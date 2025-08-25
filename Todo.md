@@ -8,6 +8,7 @@
 - [ ] Ajouter des commentaires en inline
 
 ## UI
+- [ ] Ajouter un string en haut de inscriptions pour indiqiuer le délai d'inscription / annulation
 - [ ] Afficher finaux et médians dans le calendar-manager (par exemple en bg-red-400)
 - [ ] Ne mettre que les semaines passées dans inscriptions pour les admins ?
   - __Actuellement, si on créé 15 semaines d'un coup, on voit 15 semaines vides__
