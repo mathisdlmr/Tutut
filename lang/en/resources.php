@@ -4,6 +4,7 @@ return [
     'tuteurs_employes' => [
         'label' => 'Account Management',
         'plural_label' => 'Account Management',
+        'create_label' => 'Create an account',
         'fields' => [
             'email' => 'Email Address',
             'role' => 'Role',
@@ -462,7 +463,7 @@ return [
                 'day' => 'Day',
                 'time' => 'Time',
                 'one_day_before' => 'Limit to "the day before" only',
-                'time_before' => 'Maximum time before the slot to cancel',
+                'time_before' => 'Maximum time before the slot to register or unregister',
                 'code' => 'Course',
                 'intitule' => 'Title',
             ],
@@ -525,6 +526,9 @@ return [
                 'no_active_semester' => 'No active semester',
                 'no_active_semester_message' => "There is no active semester. Please activate one in the semester settings.",
             ],
+        ],
+        'help' => [
+            'title' => 'Guide',
         ],
     ],
 ];

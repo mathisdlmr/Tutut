@@ -17,6 +17,19 @@ class CreateTuteursEmployes extends CreateRecord
 {
     protected static string $resource = TuteursEmployesResource::class;
 
+    public function getTitle(): string
+    {
+        return __('resources.tuteurs_employes.create_label');
+    }
+    
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
     /**
      * Gère la création des utilisateurs à partir des emails fournis
      * 

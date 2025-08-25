@@ -83,12 +83,14 @@ class TutorCreneauxTableWidget extends BaseWidget
                         ->label(__('resources.widgets.tutor_creneaux.columns.tutor1'))
                         ->icon('heroicon-o-user')
                         ->color('gray')
-                        ->placeholder(__('resources.common.placeholders.none')),
+                        ->placeholder(__('resources.common.placeholders.none'))
+                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor1->lastName)[0].'.'),
                     TextColumn::make('tutor2.firstName')
                         ->label(__('resources.widgets.tutor_creneaux.columns.tutor2'))
                         ->icon('heroicon-o-user')
                         ->color('gray')
-                        ->placeholder(__('resources.common.placeholders.none')),
+                        ->placeholder(__('resources.common.placeholders.none'))
+                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor2->lastName)[0].'.'),
                 ]),
                 TextColumn::make('inscriptions_count')
                     ->label(__('resources.widgets.tutor_creneaux.columns.registrations_count'))

@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Pages\CalendarManager;
 use App\Filament\Pages\SendEmail;
 use App\Filament\Pages\SettingsPage;
+use App\Filament\Pages\Tutoriel;
 use App\Filament\Pages\TutorManageUvs;
 use App\Filament\Resources\Admin\ComptabiliteResource;
 use App\Filament\Resources\Admin\SalleResource;
@@ -89,6 +90,7 @@ class AdminPanelProvider extends PanelProvider
                 TutorManageUvs::class,
                 SettingsPage::class,
                 CalendarManager::class,
+                Tutoriel::class,
             ])   
             ->widgets([
                 TutorCreneauxTableWidget::class,

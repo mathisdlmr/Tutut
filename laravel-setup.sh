@@ -14,6 +14,8 @@ php artisan view:cache --no-interaction
 php artisan event:cache --no-interaction
 php artisan optimize --no-interaction
 
+php artisan storage:link
+
 mkdir -p /var/www/html/storage/app/public/documents
 mkdir -p /var/www/html/storage/logs
 

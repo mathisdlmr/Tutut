@@ -4,6 +4,7 @@ return [
     'tuteurs_employes' => [
         'label' => 'gestion Comptes',
         'plural_label' => 'Gestion Comptes',
+        'create_label' => 'Créer un compte',
         'fields' => [
             'email' => 'Adresse Email',
             'role' => 'Rôle',
@@ -422,10 +423,10 @@ return [
             ],
             'roles' => [
                 'administrator' => 'Administrateur',
-                'employed_privileged_tutor' => 'Tuteur privilégié employé',
-                'employed_tutor' => 'Tuteur employé',
-                'tutor' => 'Tuteur',
-                'tutee' => 'Élève',
+                'employed_privileged_tutor' => 'Tuteur.ice employé.e privilégié.e',
+                'employed_tutor' => 'Tuteur.ice employé.e',
+                'tutor' => 'Tuteur.ice',
+                'tutee' => 'Tutoré.e',
             ],
             'buttons' => [
                 'preview' => 'Aperçu',
@@ -460,7 +461,7 @@ return [
                 'day' => 'Jour',
                 'time' => 'Heure',
                 'one_day_before' => 'Limiter à "la veille" uniquement',
-                'time_before' => 'Délai maximal avant un créneau pour annuler',
+                'time_before' => 'Délai maximal avant un créneau pour  s\'inscrire ou se désinscrire',
                 'max_student_for_1_tutor' => "Nombre maximum d'élèves pour 1 tuteur",
                 'max_student_for_2_tutors' => "Nombre maximum d'élèves pour 2 tuteurs",
                 'code' => 'UV',
@@ -525,6 +526,9 @@ return [
                 'no_active_semester' => 'Pas de semestre actif',
                 'no_active_semester_message' => "Il n'y a pas de semestre actif. Veuillez en activer un dans les paramètres de semestre.",
             ],
+        ],
+        'help' => [
+            'title' => 'Guide',
         ],
     ],
 ];
