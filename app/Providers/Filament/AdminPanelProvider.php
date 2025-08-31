@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\RequestPasswordReset;
+use App\Filament\Pages\Register;
 use App\Filament\Pages\CalendarManager;
 use App\Filament\Pages\SendEmail;
 use App\Filament\Pages\SettingsPage;
@@ -67,6 +69,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('tutut')
             ->path('/')
+            ->login()
+            ->registration(Register::class)
+            ->passwordReset(RequestPasswordReset::class)
+            ->authGuard('web')
             ->brandName("Tut'ut - ".$semestreActif)
             ->colors([
                 'primary' => Color::Blue,
@@ -110,7 +116,7 @@ class AdminPanelProvider extends PanelProvider
                 EnsureRgpdAccepted::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                Authenticate::class
             ]);
     }
 }

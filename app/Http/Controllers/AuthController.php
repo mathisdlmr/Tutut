@@ -2,93 +2,146 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use League\OAuth2\Client\Provider\GenericProvider;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
+use Firebase\JWT\JWT;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Firebase\JWT\Key;
+use Firebase\JWT\SignatureInvalidException;
+use LogicException;
+use UnexpectedValueException;
+use Filament\Facades\Filament;
+use Firebase\JWT\ExpiredException;
 
 class AuthController extends Controller
 {
-    public GenericProvider $provider;
-
-    public function __construct()
+    public function register(Request $request)
     {
-        $this->provider = new GenericProvider([
-            'clientId'                => config("auth.oauth.client_id"),
-            'clientSecret'            => config("auth.oauth.client_secret"),
-            'redirectUri'             => config("auth.oauth.redirect_uri"),
-            'urlAuthorize'            => config("auth.oauth.authorize_url"),
-            'urlAccessToken'          => config("auth.oauth.access_token_url"),
-            'urlResourceOwnerDetails' => config("auth.oauth.owner_details_url"),
-            'scopes'                  => config("auth.oauth.scopes"),
-        ]);
-    }
-
-    public function login(Request $request)
-    {
-        if (config('auth.app_no_login', false)) {
-            try {
-                $userID = config('auth.auto_user_id');
-                $user = User::find($userID);
-                if ($user) {
-                    Auth::login($user);
-                    return redirect(RouteServiceProvider::HOME);
-                }
-            } catch (\Exception $e) {
-                return response()->json(['message' => 'Login error :'. $e->getMessage()], 400);
-            }
+        $publicKey = config('services.crypt.public');
+        $token = $request->query('token');
+        
+        if (!$token) {
+            return response()->json(['message'=>"Token absent"],400);     
         }
+        try{
+            $decoded = JWT::decode($token, new Key($publicKey, 'RS256'));
+        } catch(ExpiredException){
+            return response()->json(['message'=>'Signature expirée'],401);
+        }catch(SignatureInvalidException){
+            return response()->json(['message'=>'Signature invalide'],401);
+        } catch (LogicException $e) {
+            return response()->json(['message' => 'Erreur dans la configuration ou les clés '], 400);
+        } catch (UnexpectedValueException $e) {
+            return response()->json(['message' => 'Le token est mal formé ou contient des données invalides'], 400);
+        }  
 
-        $state = bin2hex(random_bytes(16));
-        $request->session()->put('oauth2state', $state);
-
-        $authorizationUrl = $this->provider->getAuthorizationUrl([
-            'state' => $state
+        $existingUser = User::where('email', $decoded->email)->first();
+        if($existingUser) {
+            return response()->json(['message'=>'Cet email est déjà utilisé par un compte existant'],400);
+        }
+        
+        $user = User::create([
+            'firstName' => $decoded->firstName,
+            'lastName' => $decoded->lastName,
+            'email' => $decoded->email,
+            'password' => Hash::make($decoded->password),
         ]);
 
-        return redirect($authorizationUrl);
-    }
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        Filament::auth()->login($user);
 
-    public function callback(Request $request)
-    {
-        $storedState = $request->session()->pull('oauth2state');
-
-        if (!$request->has('state') || $request->get('state') !== $storedState) {
-            abort(400, 'Invalid state: '. $request->get('state') . ' VS ' . $storedState);
-        }
-
-        if (!$request->has('code')) {
-            abort(400, 'No authorization code');
-        }
-        try {
-            $accessToken = $this->provider->getAccessToken('authorization_code', [
-                'code' => $request->get('code'),
-            ]);
-
-            $resourceOwner = $this->provider->getResourceOwner($accessToken);
-            $userDetails = $resourceOwner->toArray();
-
-            if ($userDetails['deleted_at'] != null || $userDetails['active'] != 1) {
-                abort(401, 'Compte supprimé ou désactivé');
-            }
-
-            $user = User::where('email', $userDetails['email'])->first();
-            if(!$user->firstName){
-                $user->firstName = $userDetails["firstName"];
-                $user->lastName = $userDetails["lastName"];
-                $user->save();
-            } 
-
-            Auth::login($user);
-            return redirect(RouteServiceProvider::HOME);
-        } catch (\Exception $e) {
-            abort(400, 'Callback error : ' . $e->getMessage());
-        }
-    }
-
-    public function logout() {
-        Auth::logout();
-        return redirect(config('auth.oauth.logout_url'));
+        return redirect()->route('filament.tutut.pages.dashboard');
     }
 }
+
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Auth;
+// use League\OAuth2\Client\Provider\GenericProvider;
+// use App\Models\User;
+// use App\Providers\RouteServiceProvider;
+
+// class AuthController extends Controller
+// {
+//     public GenericProvider $provider;
+
+//     public function __construct()
+//     {
+//         $this->provider = new GenericProvider([
+//             'clientId'                => config("auth.oauth.client_id"),
+//             'clientSecret'            => config("auth.oauth.client_secret"),
+//             'redirectUri'             => config("auth.oauth.redirect_uri"),
+//             'urlAuthorize'            => config("auth.oauth.authorize_url"),
+//             'urlAccessToken'          => config("auth.oauth.access_token_url"),
+//             'urlResourceOwnerDetails' => config("auth.oauth.owner_details_url"),
+//             'scopes'                  => config("auth.oauth.scopes"),
+//         ]);
+//     }
+
+//     public function login(Request $request)
+//     {
+//         if (config('auth.app_no_login', false)) {
+//             try {
+//                 $userID = config('auth.auto_user_id');
+//                 $user = User::find($userID);
+//                 if ($user) {
+//                     Auth::login($user);
+//                     return redirect(RouteServiceProvider::HOME);
+//                 }
+//             } catch (\Exception $e) {
+//                 return response()->json(['message' => 'Login error :'. $e->getMessage()], 400);
+//             }
+//         }
+
+//         $state = bin2hex(random_bytes(16));
+//         $request->session()->put('oauth2state', $state);
+
+//         $authorizationUrl = $this->provider->getAuthorizationUrl([
+//             'state' => $state
+//         ]);
+
+//         return redirect($authorizationUrl);
+//     }
+
+//     public function callback(Request $request)
+//     {
+//         $storedState = $request->session()->pull('oauth2state');
+
+//         if (!$request->has('state') || $request->get('state') !== $storedState) {
+//             abort(400, 'Invalid state: '. $request->get('state') . ' VS ' . $storedState);
+//         }
+
+//         if (!$request->has('code')) {
+//             abort(400, 'No authorization code');
+//         }
+//         try {
+//             $accessToken = $this->provider->getAccessToken('authorization_code', [
+//                 'code' => $request->get('code'),
+//             ]);
+
+//             $resourceOwner = $this->provider->getResourceOwner($accessToken);
+//             $userDetails = $resourceOwner->toArray();
+
+//             if ($userDetails['deleted_at'] != null || $userDetails['active'] != 1) {
+//                 abort(401, 'Compte supprimé ou désactivé');
+//             }
+
+//             $user = User::where('email', $userDetails['email'])->first();
+//             if(!$user->firstName){
+//                 $user->firstName = $userDetails["firstName"];
+//                 $user->lastName = $userDetails["lastName"];
+//                 $user->save();
+//             } 
+
+//             Auth::login($user);
+//             return redirect(RouteServiceProvider::HOME);
+//         } catch (\Exception $e) {
+//             abort(400, 'Callback error : ' . $e->getMessage());
+//         }
+//     }
+
+//     public function logout() {
+//         Auth::logout();
+//         return redirect()->route('filament.auth.login');
+//     }
+// }

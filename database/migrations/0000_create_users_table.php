@@ -19,6 +19,8 @@ return new class extends Migration
             $table->string('email', 200);
             $table->string('firstName', 100)->nullable();
             $table->string('lastName', 100)->nullable();
+            $table->string('password');
+            $table->rememberToken();
             $table->enum('role', $roles)->default('tutee');
             $table->json('languages')->nullable();
             $table->timestamp('rgpd_accepted_at')->nullable();

@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'crypt' => [
+        'public' => file_get_contents(storage_path(env('JWT_PUBLIC_KEY_PATH', 'app/keys/public.key'))),
+        'private' => file_get_contents(storage_path(env('JWT_PRIVATE_KEY_PATH', 'app/keys/private.key'))),
+    ],
 ];

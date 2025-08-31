@@ -17,9 +17,9 @@ class Authenticate
      * @return mixed
      */
     public function handle(Request $request, Closure $next): Response
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login');
+    {        
+        if (!Auth::guard('web')->check()) {
+            return redirect()->route('filament.tutut.auth.login');
         }
 
         return $next($request);

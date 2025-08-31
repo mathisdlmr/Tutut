@@ -5,18 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Filament\Models\Contracts\HasName;
-use Filament\Panel;
 use App\Enums\Roles;
+use Illuminate\Notifications\Notifiable;
+use App\Notifications\ResetPasswordNotification;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable implements HasName
+class User extends Authenticatable implements HasName, FilamentUser
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
-    protected $fillable = ['email', 'firstName', 'lastName', 'role', 'languages', 'rgpd_accepted_at'];
+    protected $fillable = ['email', 'firstName', 'lastName', 'password', 'role', 'languages', 'rgpd_accepted_at'];
+
+    protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'languages' => 'array',
     ];
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
 
     public function getFilamentName(): string
     {

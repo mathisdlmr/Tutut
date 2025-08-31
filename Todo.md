@@ -22,3 +22,9 @@
 - [ ] Ajouter un filtre dans inscriptions pour filtrer sur une UV ("je veux faire du mt23, n'afficher que les créneaux avec du mt23)
 - [ ] Ajouter un moyen de joindre les tuteur.ice / tutoré.e ? (type Messenger) en cas d'imprévu
 - [ ] Permettre aux admin de retirer une UV dans ViewUvsProposees
+
+
+
+Une fois l'adresse mail recup
+- Mail de confirmation d'email pour créer le compte
+- Vérifier le reset du mdp par mail
