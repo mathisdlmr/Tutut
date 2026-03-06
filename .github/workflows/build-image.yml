@@ -28,4 +28,5 @@ jobs:
         with:
           context: .
           push: true
+          file: ./Dockerfile.prod
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tutut:latest
