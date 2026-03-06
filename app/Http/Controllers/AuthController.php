@@ -15,13 +15,13 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->provider = new GenericProvider([
-            'clientId'                => config('auth.oauth.client_id'),
-            'clientSecret'            => config('auth.oauth.client_secret'),
-            'redirectUri'             => config('auth.oauth.redirect_uri'),
-            'urlAuthorize'            => config('auth.oauth.authorize_url'),
-            'urlAccessToken'          => config('auth.oauth.access_token_url'),
+            'clientId' => config('auth.oauth.client_id'),
+            'clientSecret' => config('auth.oauth.client_secret'),
+            'redirectUri' => config('auth.oauth.redirect_uri'),
+            'urlAuthorize' => config('auth.oauth.authorize_url'),
+            'urlAccessToken' => config('auth.oauth.access_token_url'),
             'urlResourceOwnerDetails' => config('auth.oauth.owner_details_url'),
-            'scopes'                  => config('auth.oauth.scopes'),
+            'scopes' => config('auth.oauth.scopes'),
         ]);
     }
 
@@ -36,7 +36,7 @@ class AuthController extends Controller
                     return redirect(RouteServiceProvider::HOME);
                 }
             } catch (\Exception $e) {
-                return response()->json(['message' => 'Login error :'. $e->getMessage()], 400);
+                return response()->json(['message' => 'Login error :' . $e->getMessage()], 400);
             }
         }
 
@@ -55,7 +55,7 @@ class AuthController extends Controller
         $storedState = $request->session()->pull('oauth2state');
 
         if (!$request->has('state') || $request->get('state') !== $storedState) {
-            abort(400, 'Invalid state: '. $request->get('state') . ' VS ' . $storedState);
+            abort(400, 'Invalid state: ' . $request->get('state') . ' VS ' . $storedState);
         }
 
         if (!$request->has('code')) {
@@ -81,6 +81,7 @@ class AuthController extends Controller
             }
 
             Auth::login($user);
+            $request->session()->regenerate();
             return redirect(RouteServiceProvider::HOME);
         } catch (\Exception $e) {
             abort(400, 'Callback error : ' . $e->getMessage());

@@ -23,8 +23,8 @@ use App\Filament\Widgets\TuteeCreneauxWidget;
 use App\Filament\Widgets\TutorCreneauxTableWidget;
 use App\Http\Middleware\EnsureRgpdAccepted;
 use App\Models\Semestre;
+use App\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -67,7 +67,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('tutut')
             ->path('/')
-            ->brandName("Tut'ut - ".$semestreActif)
+            ->brandName("Tut'ut - " . $semestreActif)
             ->colors([
                 'primary' => Color::Blue,
             ])
