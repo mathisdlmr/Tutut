@@ -1,29 +1,27 @@
 <?php
+
 namespace App\Filament\Pages;
 
-use App\Models\UV;
 use App\Enums\Roles;
-use Filament\Actions\Action;
-use Filament\Tables\Actions\Action as TableAction;
-use Illuminate\Support\Facades\Auth;
-use Filament\Pages\Page;
+use App\Models\UV;
 use Filament\Forms;
-use Filament\Tables;
-use Illuminate\Support\Facades\Http;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Notifications\Notification;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Tables;
+use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\EditAction;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
-use Filament\Tables\Actions\Action as ActionsAction;
 
 /**
  * Page de paramètres généraux
- * 
+ *
  * Cette page permet aux administrateurs et tuteurs privilégiés de configurer
  * les paramètres globaux de l'application.
  * Fonctionnalités:
@@ -64,7 +62,7 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
         'maxStudentFor1Tutor' => null,
         'maxStudentFor2Tutors' => null,
     ];
-    
+
     protected function getDays(): array
     {
         return [
@@ -83,7 +81,7 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
         return __('resources.pages.settings.title');
     }
 
-    public static function getNavigationLabel(): string 
+    public static function getNavigationLabel(): string
     {
         return __('resources.pages.settings.title');
     }
@@ -97,7 +95,7 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
 
     public function mount(): void
     {
-        $this->loadSettings();        
+        $this->loadSettings();
         $this->form->fill($this->settings);
     }
 
@@ -111,18 +109,18 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
     public function saveSettings(): void
     {
         $data = $this->form->getState();
-        
+
         foreach ($data as $key => $value) {
             $this->settings[$key] = $value;
         }
-        
+
         // Si on utilise "la veille", on vide les champs minTimeCancellation
         if ($data['useOneDayBeforeCancellation']) {
             $this->settings['minTimeCancellationTime'] = null;
         }
-        
+
         Storage::put('settings.json', json_encode($this->settings));
-        
+
         Notification::make()
             ->title(__('resources.pages.settings.notifications.settings_saved_title'))
             ->success()
@@ -184,7 +182,7 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
                                         ->reactive()
                                         ->inline(false)
                                         ->columnSpan('full'),
-                                        
+
                                     TimePicker::make('minTimeCancellationTime')
                                         ->label(__('resources.pages.settings.fields.time_before'))
                                         ->seconds(false)

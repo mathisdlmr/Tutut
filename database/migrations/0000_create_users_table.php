@@ -1,18 +1,17 @@
 <?php
 
+use App\Enums\Roles;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Enums\Roles;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
-        $roles = array_map(fn(Roles $role) => $role->value, Roles::cases());
+        $roles = array_map(fn (Roles $role) => $role->value, Roles::cases());
 
         Schema::create('users', function (Blueprint $table) use ($roles) {
             $table->id('id');

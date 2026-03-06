@@ -1,0 +1,73 @@
+##############################################
+# Stage 1 : build des assets frontend (Vite)
+##############################################
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build
+
+##############################################
+# Stage 2 : image PHP-FPM de production
+##############################################
+FROM php:8.3-fpm
+
+# Dépendances système
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    zip unzip git curl nginx supervisor \
+    libicu-dev libxml2-dev \
+    libzip-dev zlib1g-dev \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    libonig-dev libsqlite3-dev libmariadb-dev \
+    g++ make autoconf \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install \
+        intl pdo pdo_mysql mysqli pdo_sqlite \
+        xml zip gd opcache \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Copier les sources
+COPY . .
+
+# Installer les dépendances PHP (production only, pas de dev)
+RUN composer install \
+        --no-interaction \
+        --no-dev \
+        --prefer-dist \
+        --optimize-autoloader
+
+# Copier les assets compilés depuis le stage frontend
+COPY --from=frontend-builder /app/public/build ./public/build
+
+# Config Nginx
+COPY k8s/nginx.k8s.conf /etc/nginx/conf.d/default.conf
+
+# Config Supervisor (gère nginx + php-fpm ensemble dans un seul conteneur)
+COPY k8s/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Script de démarrage Laravel (version K8s avec wait-for-mysql + supervisord)
+COPY k8s/laravel-entrypoint.sh /usr/local/bin/laravel-entrypoint.sh
+RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
+
+# Permissions
+RUN addgroup --gid 1000 www \
+    && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password www \
+    && chown -R www:www /var/www/html \
+    && chmod -R 775 storage bootstrap/cache \
+    # Nginx a besoin d'écrire dans ses dossiers en worker
+    && chown -R www:www /var/lib/nginx /var/log/nginx /run
+
+# Expose HTTP
+EXPOSE 8080
+
+ENTRYPOINT ["/usr/local/bin/laravel-entrypoint.sh"]

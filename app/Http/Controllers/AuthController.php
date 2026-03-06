@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use League\OAuth2\Client\Provider\GenericProvider;
-use App\Models\User;
-use App\Providers\RouteServiceProvider;
 
 class AuthController extends Controller
 {
@@ -15,13 +15,13 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->provider = new GenericProvider([
-            'clientId'                => config("auth.oauth.client_id"),
-            'clientSecret'            => config("auth.oauth.client_secret"),
-            'redirectUri'             => config("auth.oauth.redirect_uri"),
-            'urlAuthorize'            => config("auth.oauth.authorize_url"),
-            'urlAccessToken'          => config("auth.oauth.access_token_url"),
-            'urlResourceOwnerDetails' => config("auth.oauth.owner_details_url"),
-            'scopes'                  => config("auth.oauth.scopes"),
+            'clientId'                => config('auth.oauth.client_id'),
+            'clientSecret'            => config('auth.oauth.client_secret'),
+            'redirectUri'             => config('auth.oauth.redirect_uri'),
+            'urlAuthorize'            => config('auth.oauth.authorize_url'),
+            'urlAccessToken'          => config('auth.oauth.access_token_url'),
+            'urlResourceOwnerDetails' => config('auth.oauth.owner_details_url'),
+            'scopes'                  => config('auth.oauth.scopes'),
         ]);
     }
 
@@ -74,11 +74,11 @@ class AuthController extends Controller
             }
 
             $user = User::where('email', $userDetails['email'])->first();
-            if(!$user->firstName){
-                $user->firstName = $userDetails["firstName"];
-                $user->lastName = $userDetails["lastName"];
+            if (!$user->firstName) {
+                $user->firstName = $userDetails['firstName'];
+                $user->lastName = $userDetails['lastName'];
                 $user->save();
-            } 
+            }
 
             Auth::login($user);
             return redirect(RouteServiceProvider::HOME);
@@ -87,7 +87,8 @@ class AuthController extends Controller
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         Auth::logout();
         return redirect(config('auth.oauth.logout_url'));
     }

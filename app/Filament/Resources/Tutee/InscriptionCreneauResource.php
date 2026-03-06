@@ -9,23 +9,23 @@ use App\Models\Inscription;
 use App\Models\Semaine;
 use App\Models\Semestre;
 use Carbon\Carbon;
-use Filament\Resources\Resource;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\Resource;
 use Filament\Tables;
-use Illuminate\Support\Collection;
-use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\Layout\Split;
+use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 
 /**
  * Resource d'inscription aux créneaux pour les tutorés
- * 
+ *
  * Cette ressource permet aux tutorés de consulter et de s'inscrire
  * aux créneaux de tutorat disponibles.
  * Fonctionnalités :
@@ -44,7 +44,7 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Obtient le label de navigation pour la ressource
-     * 
+     *
      * @return string Le label traduit pour la navigation
      */
     public static function getNavigationLabel(): string
@@ -54,7 +54,7 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Obtient le label du modèle pour la ressource
-     * 
+     *
      * @return string Le label traduit pour le modèle
      */
     public static function getModelLabel(): string
@@ -64,7 +64,7 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Obtient le label pluriel du modèle pour la ressource
-     * 
+     *
      * @return string Le label pluriel traduit pour le modèle
      */
     public static function getPluralModelLabel(): string
@@ -74,7 +74,7 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Configure le formulaire (non utilisé pour cette ressource)
-     * 
+     *
      * @param Form $form Le formulaire à configurer
      * @return Form Le formulaire configuré
      */
@@ -85,10 +85,10 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Formate les codes d'UVs pour un affichage plus compact
-     * 
+     *
      * Regroupe les codes d'UVs par préfixe pour optimiser l'affichage.
      * Par exemple, "MT41, MT42, MT45" devient "MT41/42/45"
-     * 
+     *
      * @param Collection $codes Collection des codes d'UVs à formater
      * @return string Les codes formatés et regroupés
      */
@@ -96,22 +96,22 @@ class InscriptionCreneauResource extends Resource
     {
         return $codes
             ->sort()
-            ->groupBy(fn($code) => substr($code, 0, 2))
+            ->groupBy(fn ($code) => substr($code, 0, 2))
             ->map(function ($group, $prefix) {
-                $suffixes = $group->map(fn($code) => substr($code, 2))->sort()->join('/');
+                $suffixes = $group->map(fn ($code) => substr($code, 2))->sort()->join('/');
                 return $prefix . $suffixes;
             })
             ->values()
             ->join("\n");
-    }   
-    
+    }
+
     /**
      * Balance les éléments horizontalement dans une ligne
-     * 
+     *
      * Cette méthode permet de réaliser un affichage de texte avec des éléments
      * qui doivent être affichés horizontalement, mais qui ne peuvent pas être
      * affichés tous en une seule ligne.
-     * 
+     *
      * @param array $items Tableau d'éléments à afficher
      * @param int $maxCharsPerLine Nombre de caractères maximum par ligne
      * @return array Tableau d'éléments répartis sur plusieurs lignes
@@ -145,7 +145,7 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Récupère les paramètres généraux depuis le fichier de configuration
-     * 
+     *
      * @return array Tableau associatif des paramètres
      */
     public static function getSettings(): array
@@ -159,44 +159,44 @@ class InscriptionCreneauResource extends Resource
 
     /**
      * Détermine si la semaine suivante doit être affichée pour l'inscription
-     * 
+     *
      * Cette méthode vérifie, en fonction des paramètres de configuration,
      * si la date/heure actuelle permet aux tutorés de voir les créneaux
      * de la semaine suivante.
-     * 
+     *
      * @return bool Vrai si la semaine suivante doit être affichée
      */
     protected static function shouldShowNextWeek(): bool
     {
         $settings = self::getSettings();
-        
+
         $registrationDay = $settings['tuteeRegistrationDay'] ?? 'sunday';
         $registrationTime = $settings['tuteeRegistrationTime'] ?? '16:00';
-        
+
         $now = Carbon::now();
         $currentDayOfWeek = strtolower($now->englishDayOfWeek);
-        
+
         if ($currentDayOfWeek === strtolower($registrationDay)) {  // Si on est le jour de changement, on vérifie l'heure
-            list($hour, $minute) = explode(':', $registrationTime);  
+            list($hour, $minute) = explode(':', $registrationTime);
             $registrationDateTime = Carbon::now()->setTime((int)$hour, (int)$minute, 0);
             return $now->greaterThanOrEqualTo($registrationDateTime);
         } else {   // On détermine si on est après le jour d'inscription
             $daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
             $registrationDayIndex = array_search(strtolower($registrationDay), $daysOfWeek);
             $currentDayIndex = array_search($currentDayOfWeek, $daysOfWeek);
-            
+
             return ($currentDayIndex > $registrationDayIndex);
         }
     }
 
     /**
      * Vérifie si l'utilisateur peut annuler son inscription à un créneau
-     * 
+     *
      * Applique diverses règles pour déterminer si l'annulation est possible :
      * - Interdiction d'annuler un créneau déjà commencé
      * - Option pour interdire l'annulation le jour même du créneau
      * - Règle de délai minimum avant le début du créneau
-     * 
+     *
      * @param Creneaux $creneau Le créneau dont on veut vérifier la possibilité d'annulation
      * @return bool Vrai si l'annulation est possible
      */
@@ -208,55 +208,55 @@ class InscriptionCreneauResource extends Resource
         if ($now->greaterThan($creneau->start)) {
             return false;
         }
-        
+
         // Si on utilise la règle "pas d'annulation le jour même"
-        if (($settings['useOneDayBeforeCancellation'] ?? false) && 
+        if (($settings['useOneDayBeforeCancellation'] ?? false) &&
             $now->format('Y-m-d') === $creneau->start->format('Y-m-d')) {
-                return false;
+            return false;
         }
-        
+
         // Si on a une durée minimale avant le créneau
         if (!empty($settings['minTimeCancellationTime'])) {
             list($hours, $minutes) = explode(':', $settings['minTimeCancellationTime']);
             $minTimeInMinutes = ((int)$hours * 60) + (int)$minutes;
-            
+
             $diffInMinutes = $now->diffInMinutes($creneau->start, false);
             return $diffInMinutes >= $minTimeInMinutes;
         }
-        
+
         return true;
     }
 
     /**
      * Configure la table d'affichage des créneaux pour les tutorés
-     * 
+     *
      * Cette méthode configure une interface avancée de visualisation
      * avec de nombreuses fonctionnalités :
      * - Groupement des créneaux par jour et heure
      * - Affichage détaillé des informations (tuteurs, langue, salle, etc.)
      * - Actions d'inscription ou désinscription avec contrôle d'accès
      * - Optimisation visuelle pour présenter de nombreuses informations
-     * 
+     *
      * @param Table $table La table à configurer
      * @return Table La table configurée
      */
     public static function table(Table $table): Table
     {
         $userId = Auth::id();
-        
+
         $activeSemester = Semestre::getActive();
         if (!$activeSemester) {
             return $table->query(Creneaux::query()->where('id', -1));
         }
-        
+
         return $table
             ->query(
                 Creneaux::query()
                     ->with([
-                        'tutor1.proposedUvs', 
+                        'tutor1.proposedUvs',
                         'tutor2.proposedUvs',
                         'inscriptions'
-                    ])   
+                    ])
                     ->withCount('inscriptions')
                     ->where(function ($query) {
                         $query->whereNotNull('tutor1_id')
@@ -268,11 +268,13 @@ class InscriptionCreneauResource extends Resource
                 Tables\Grouping\Group::make('day_and_time')
                     ->label(__('resources.common.fields.jour_et_horaire'))
                     ->titlePrefixedWithLabel(false)
-                    ->getTitleFromRecordUsing(fn(Creneaux $record) =>
-                        ucfirst($record->start->translatedFormat('l d F Y')) . ' - ' . 
+                    ->getTitleFromRecordUsing(
+                        fn (Creneaux $record) =>
+                        ucfirst($record->start->translatedFormat('l d F Y')) . ' - ' .
                         $record->start->format('H:i') . ' à ' . $record->end->format('H:i')
                     )
-                    ->getKeyFromRecordUsing(fn(Creneaux $record) => 
+                    ->getKeyFromRecordUsing(
+                        fn (Creneaux $record) =>
                         $record->start->format('Y-m-d') . '_' . $record->start->format('H:i')
                     )
                     ->collapsible(true),
@@ -287,8 +289,8 @@ class InscriptionCreneauResource extends Resource
                             ->color('gray')
                             ->placeholder('—')
                             ->formatStateUsing(function ($state, $record) {
-                                $languages = is_string($record->tutor1->languages) 
-                                    ? json_decode($record->tutor1->languages, true) 
+                                $languages = is_string($record->tutor1->languages)
+                                    ? json_decode($record->tutor1->languages, true)
                                     : ($record->tutor1->languages ?? []);
                                 $flags = collect($languages)->map(function ($lang) {
                                     return match ($lang) {
@@ -312,8 +314,8 @@ class InscriptionCreneauResource extends Resource
                             ->color('gray')
                             ->placeholder('—')
                             ->formatStateUsing(function ($state, $record) {
-                                $languages = is_string($record->tutor2->languages) 
-                                    ? json_decode($record->tutor2->languages, true) 
+                                $languages = is_string($record->tutor2->languages)
+                                    ? json_decode($record->tutor2->languages, true)
                                     : ($record->tutor2->languages ?? []);
                                 $flags = collect($languages)->map(function ($lang) {
                                     return match ($lang) {
@@ -328,7 +330,7 @@ class InscriptionCreneauResource extends Resource
                                         default => null,
                                     };
                                 })->filter()->implode(' ');
-                                return $state . ' ' .($record->tutor2->lastName)[0].'.' . ($flags ? " {$flags}" : '');  
+                                return $state . ' ' .($record->tutor2->lastName)[0].'.' . ($flags ? " {$flags}" : '');
                             }),
                     ]),
 
@@ -373,7 +375,7 @@ class InscriptionCreneauResource extends Resource
                         })
                         ->icon('heroicon-o-academic-cap')
                         ->color('primary')
-                        ->html(),                                             
+                        ->html(),
                 ])
             ])
             ->actions([
@@ -381,7 +383,7 @@ class InscriptionCreneauResource extends Resource
                     ->label(__('resources.common.buttons.s_inscrire'))
                     ->icon('heroicon-o-plus')
                     ->button()
-                    ->form(fn(Creneaux $record) => [
+                    ->form(fn (Creneaux $record) => [
                         Forms\Components\Select::make('enseignements_souhaites')
                             ->label(__('resources.common.fields.uvs_souhaitees'))
                             ->multiple()
@@ -389,8 +391,9 @@ class InscriptionCreneauResource extends Resource
                             ->options(
                                 collect([$record->tutor1, $record->tutor2])
                                     ->filter()
-                                    ->flatMap(fn($tutor) =>
-                                        $tutor->proposedUvs->mapWithKeys(fn($uv) => [
+                                    ->flatMap(
+                                        fn ($tutor) =>
+                                        $tutor->proposedUvs->mapWithKeys(fn ($uv) => [
                                             $uv->code => "{$uv->code} - {$uv->intitule}"
                                         ])
                                     )
@@ -398,7 +401,7 @@ class InscriptionCreneauResource extends Resource
                             )
                             ->placeholder('Choisissez vos UVs')
                             ->maxItems(3),
-                    ])                    
+                    ])
                     ->visible(function (Creneaux $record) use ($userId) {
                         $settings = self::getSettings();
                         $max = ($record->tutor1_id && $record->tutor2_id)
@@ -430,7 +433,7 @@ class InscriptionCreneauResource extends Resource
                     ->color('danger')
                     ->button()
                     ->visible(function (Creneaux $record) use ($userId) {
-                        return $record->inscriptions->contains('tutee_id', $userId) && 
+                        return $record->inscriptions->contains('tutee_id', $userId) &&
                                self::canChange($record);
                     })
                     ->action(function (Creneaux $record) use ($userId) {
@@ -446,23 +449,23 @@ class InscriptionCreneauResource extends Resource
                     ->visible(fn (Creneaux $record) => $record->inscriptions_count > 0)
                     ->modalContent(function (Creneaux $record) {
                         $html = '<ul class="space-y-2">';
-                    
+
                         foreach ($record->inscriptions as $inscription) {
                             $user = $inscription->tutee;
                             $uvs = collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
                                 ->sort()
                                 ->implode(', ');
-                    
+
                             $html .= "<li>
                                         <strong>• {$user->firstName} {$user->lastName}</strong> : {$uvs}<br>
                                       </li>";
                         }
-                    
+
                         $html .= '</ul>';
-                    
+
                         return new HtmlString($html);
-                    })                    
-                    ->disabled(fn(Creneaux $record) => $record->inscriptions_count === 0)
+                    })
+                    ->disabled(fn (Creneaux $record) => $record->inscriptions_count === 0)
                     ->button()
                     ->outlined()
             ])
@@ -472,14 +475,14 @@ class InscriptionCreneauResource extends Resource
             ])
             ->paginated(false)
             ->recordUrl(null);
-    }                
+    }
 
     /**
      * Définit les pages disponibles pour cette ressource
-     * 
+     *
      * Cette ressource ne contient qu'une page d'index qui liste
      * les créneaux disponibles pour l'inscription.
-     * 
+     *
      * @return array Tableau associatif des pages
      */
     public static function getPages(): array

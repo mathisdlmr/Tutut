@@ -5,16 +5,16 @@ namespace App\Filament\Pages;
 use App\Enums\Roles;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Pages\Page;
-use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\{Grid, RichEditor, Select, TextInput};
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * Page d'envoi d'emails
- * 
+ *
  * Cette page permet aux administrateurs et tuteurs privilégiés d'envoyer des emails
  * aux différents utilisateurs de la plateforme.
  * Fonctionnalités:
@@ -38,7 +38,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
     public $mailTitle;
     public $content;
     public $roles = [];
-    
+
     public $canSendEmailFlag = false;
     public $canPreviewEmailFlag = false;
     public $canSaveTemplateFlag = false;
@@ -48,7 +48,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
         return __('resources.pages.send_email.title');
     }
 
-    public static function getNavigationLabel(): string 
+    public static function getNavigationLabel(): string
     {
         return __('resources.pages.send_email.title');
     }
@@ -62,14 +62,14 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
     {
         $this->templateOptions = $this->getTemplateOptions();
         $this->updateButtonStates();
-    }    
+    }
 
     public static function canAccess(): bool
     {
         $user = Auth::user();
         return $user && (Auth::user()->role === Roles::EmployedPrivilegedTutor->value
             || Auth::user()->role === Roles::Administrator->value);
-    }   
+    }
 
     protected function getFormSchema(): array
     {
@@ -87,13 +87,14 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
                             // Mettre à jour l'état des boutons après le chargement du template
                             $this->updateButtonStates();
                         }
-                }),            
+                    }),
             ]),
-    
+
             Select::make('roles')
                 ->label(__('resources.pages.send_email.fields.roles'))
                 ->multiple()
-                ->options(collect(Roles::cases())
+                ->options(
+                    collect(Roles::cases())
                     ->mapWithKeys(fn ($role) => [
                         $role->value => match ($role) {
                             Roles::Administrator => __('resources.pages.send_email.roles.administrator'),
@@ -108,19 +109,19 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
                 ->reactive()
                 ->afterStateUpdated(fn () => $this->updateButtonStates())
                 ->required(),
-    
+
             TextInput::make('mailTitle')
                 ->label(__('resources.pages.send_email.fields.mail_title'))
                 ->reactive()
                 ->afterStateUpdated(fn () => $this->updateButtonStates())
                 ->required(),
-    
+
             RichEditor::make('content')
                 ->label(__('resources.pages.send_email.fields.content'))
                 ->reactive()
                 ->afterStateUpdated(fn () => $this->updateButtonStates())
                 ->required(),
-    
+
             TextInput::make('templateName')
                 ->label(__('resources.pages.send_email.fields.template_name'))
                 ->placeholder(__('resources.pages.send_email.fields.template_name'))
@@ -128,7 +129,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
                 ->afterStateUpdated(fn () => $this->updateButtonStates())
                 ->helperText(__('resources.pages.send_email.fields.template_name_helper')),
         ];
-    }    
+    }
 
     // Méthode pour mettre à jour l'état des boutons
     public function updateButtonStates()
@@ -147,7 +148,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
     public function previewEmail()
     {
         $this->dispatch('open-modal', id: 'email-preview');
-    }    
+    }
 
     public function sendEmail()
     {

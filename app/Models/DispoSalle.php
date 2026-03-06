@@ -17,4 +17,4 @@ class DispoSalle extends Model
     {
         return $this->belongsTo(Salle::class, 'fk_salle', 'numero');
     }
-} 
+}

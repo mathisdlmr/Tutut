@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\Roles;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Filament\Models\Contracts\HasName;
-use Filament\Panel;
-use App\Enums\Roles;
 
 class User extends Authenticatable implements HasName
 {
@@ -20,14 +19,14 @@ class User extends Authenticatable implements HasName
 
     public function getFilamentName(): string
     {
-        return ($this->firstName." ".$this->lastName);
+        return ($this->firstName.' '.$this->lastName);
     }
 
     public function proposedUvs()
     {
         return $this->belongsToMany(UV::class, 'tutor_propose', 'fk_user', 'fk_code');
-    } 
-    
+    }
+
     public function scopeEmployedTutors($query)
     {
         return $query->whereIn('role', [
@@ -44,7 +43,7 @@ class User extends Authenticatable implements HasName
     public function heuresSupplementaires()
     {
         return $this->hasMany(HeuresSupplementaires::class);
-    }    
+    }
 
     public function comptabilites()
     {

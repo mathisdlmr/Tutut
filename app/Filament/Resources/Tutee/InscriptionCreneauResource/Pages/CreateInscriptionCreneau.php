@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Tutee\InscriptionCreneauResource\Pages;
 
 use App\Filament\Resources\Tutee\InscriptionCreneauResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateInscriptionCreneau extends CreateRecord

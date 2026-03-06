@@ -7,9 +7,9 @@ use Filament\Resources\Pages\EditRecord;
 
 /**
  * Page d'édition d'une comptabilité
- * 
+ *
  * Cette page permet théoriquement d'éditer directement un enregistrement de comptabilité,
- * mais en pratique, les modifications sont généralement effectuées via l'interface principale 
+ * mais en pratique, les modifications sont généralement effectuées via l'interface principale
  * de la ressource ComptabiliteResource, qui offre une expérience plus complète et contextuelle.
  */
 class EditComptabilite extends EditRecord

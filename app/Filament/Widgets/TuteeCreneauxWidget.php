@@ -2,16 +2,16 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Creneaux;
 use App\Enums\Roles;
-use Filament\Widgets\TableWidget as BaseWidget;
+use App\Models\Creneaux;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Widget de visualisation des créneaux pour un tutoré
- * 
+ *
  * Ce widget affiche les créneaux à venir auxquels le tutoré est inscrit.
  * Informations affichées pour chaque créneau :
  * - Date et jour
@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Auth;
  * - Salle
  * - Tuteurs assignés
  * - UVs demandées
- * 
+ *
  * Les créneaux sont regroupés par jour pour une meilleure lisibilité.
  */
 class TuteeCreneauxWidget extends BaseWidget
@@ -38,18 +38,18 @@ class TuteeCreneauxWidget extends BaseWidget
         $user = Auth::user();
 
         return Creneaux::query()
-            ->whereHas('inscriptions', fn($query) => $query->where('tutee_id', $user->id))
+            ->whereHas('inscriptions', fn ($query) => $query->where('tutee_id', $user->id))
             ->where('end', '>=', now())
             ->where(function ($query) use ($user) {
                 $query->whereNotNull('tutor1_id')
                     ->orWhereNotNull('tutor2_id');
-                })
+            })
             ->with([
             'salle',
             'semaine',
             'tutor1',
             'tutor2',
-            'inscriptions' => fn($q) => $q->where('tutee_id', $user->id),
+            'inscriptions' => fn ($q) => $q->where('tutee_id', $user->id),
             ])
             ->orderBy('start');
     }
@@ -62,7 +62,8 @@ class TuteeCreneauxWidget extends BaseWidget
                     ->label(__('resources.widgets.tutee_creneaux.columns.day'))
                     ->icon('heroicon-o-calendar-days')
                     ->color('gray')
-                    ->formatStateUsing(fn($state, $record) =>
+                    ->formatStateUsing(
+                        fn ($state, $record) =>
                         ucfirst($record->start->translatedFormat('l d F Y'))
                     ),
 
@@ -71,7 +72,8 @@ class TuteeCreneauxWidget extends BaseWidget
                         ->label(__('resources.widgets.tutee_creneaux.columns.schedule'))
                         ->icon('heroicon-o-clock')
                         ->color('gray')
-                        ->formatStateUsing(fn($state, $record) =>
+                        ->formatStateUsing(
+                            fn ($state, $record) =>
                             $record->start->format('H:i') . ' - ' . $record->end->format('H:i')
                         ),
 
@@ -86,20 +88,20 @@ class TuteeCreneauxWidget extends BaseWidget
                         ->icon('heroicon-o-user')
                         ->color('gray')
                         ->placeholder(__('resources.common.placeholders.none'))
-                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor1->lastName)[0].'.'),
+                        ->formatStateUsing(fn ($state, $record) => $state . ' ' .($record->tutor1->lastName)[0].'.'),
 
                     TextColumn::make('tutor2.firstName')
                         ->label(__('resources.widgets.tutee_creneaux.columns.tutor2'))
                         ->icon('heroicon-o-user')
                         ->color('gray')
                         ->placeholder(__('resources.common.placeholders.none'))
-                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor2->lastName)[0].'.'),
+                        ->formatStateUsing(fn ($state, $record) => $state . ' ' .($record->tutor2->lastName)[0].'.'),
                 ]),
                 TextColumn::make('id')
                     ->label(__('resources.widgets.tutee_creneaux.columns.requested_courses'))
                     ->formatStateUsing(function ($state, Creneaux $creneau) {
                         $uvs = $creneau->inscriptions
-                            ->flatMap(fn($inscription) => json_decode($inscription->enseignements_souhaites ?? '[]'))
+                            ->flatMap(fn ($inscription) => json_decode($inscription->enseignements_souhaites ?? '[]'))
                             ->filter()
                             ->unique()
                             ->sort()
@@ -128,7 +130,8 @@ class TuteeCreneauxWidget extends BaseWidget
         return [
             Tables\Grouping\Group::make('day')
                 ->label(__('resources.widgets.tutee_creneaux.columns.day'))
-                ->getTitleFromRecordUsing(fn(Creneaux $record) =>
+                ->getTitleFromRecordUsing(
+                    fn (Creneaux $record) =>
                     ucfirst($record->start->translatedFormat('l d F Y'))
                 )
                 ->collapsible(false),

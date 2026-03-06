@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Page d'édition d'un feedback
- * 
+ *
  * Cette page permet aux tutorés de modifier leurs feedbacks existants.
  * Des contrôles d'accès empêchent les utilisateurs de modifier les feedbacks
  * qui ne leur appartiennent pas.
@@ -20,9 +20,9 @@ class EditFeedback extends EditRecord
 
     /**
      * Vérifie si un utilisateur peut éditer un feedback spécifique
-     * 
+     *
      * Limite l'édition aux feedbacks appartenant à l'utilisateur connecté
-     * 
+     *
      * @param mixed $record Le feedback à éditer
      * @return bool Vrai si l'utilisateur est autorisé à modifier ce feedback
      */
@@ -33,10 +33,10 @@ class EditFeedback extends EditRecord
 
     /**
      * Définit les actions disponibles dans l'en-tête
-     * 
+     *
      * Ajoute un bouton de suppression pour permettre aux tutorés
      * d'effacer leurs feedbacks
-     * 
+     *
      * @return array Tableau des actions d'en-tête
      */
     protected function getHeaderActions(): array

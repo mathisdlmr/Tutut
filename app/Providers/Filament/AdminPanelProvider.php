@@ -18,27 +18,27 @@ use App\Filament\Resources\Tutor\ComptabiliteTutorResource;
 use App\Filament\Resources\Tutor\CreneauResource as TutorCreneauResource;
 use App\Filament\Resources\Tutor\FeedbackResource as TutorFeedbackResource;
 use App\Filament\Resources\Tutor\TutorApplicationResource;
-use Filament\Http\Middleware\Authenticate;
-use Filament\Http\Middleware\AuthenticateSession;
-use Filament\Http\Middleware\DisableBladeIconComponents;
-use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Panel;
-use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
-use Filament\Pages\Dashboard;
 use App\Filament\Widgets\AdminWidget;
 use App\Filament\Widgets\TuteeCreneauxWidget;
 use App\Filament\Widgets\TutorCreneauxTableWidget;
 use App\Http\Middleware\EnsureRgpdAccepted;
 use App\Models\Semestre;
+use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Dashboard;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -62,7 +62,7 @@ class AdminPanelProvider extends PanelProvider
                 $semestreActif = $actif?->code;
             }
         }
-        
+
         return $panel
             ->default()
             ->id('tutut')
@@ -91,12 +91,12 @@ class AdminPanelProvider extends PanelProvider
                 SettingsPage::class,
                 CalendarManager::class,
                 Tutoriel::class,
-            ])   
+            ])
             ->widgets([
                 TutorCreneauxTableWidget::class,
                 TuteeCreneauxWidget::class,
                 AdminWidget::class,
-            ])         
+            ])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

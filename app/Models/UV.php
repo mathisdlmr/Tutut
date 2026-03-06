@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\Roles;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Filament\Models\Contracts\HasName;
-use App\Enums\Roles;
 
 class UV extends Authenticatable implements HasName
 {
@@ -35,7 +35,7 @@ class UV extends Authenticatable implements HasName
     public function volunteerTutors()
     {
         return $this->tutors()->where('role', Roles::Tutor->value);
-    } 
+    }
 
     public function getFilamentName(): string
     {
@@ -45,5 +45,5 @@ class UV extends Authenticatable implements HasName
     public function getLabelAttribute(): string
     {
         return "{$this->code} - {$this->intitule}";
-    }    
+    }
 }

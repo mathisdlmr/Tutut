@@ -2,23 +2,22 @@
 
 namespace App\Filament\Resources\Admin;
 
+use App\Enums\Roles;
 use App\Filament\Resources\Admin\TuteursEmployesResource\Pages;
 use App\Models\User;
-use App\Enums\Roles;
-use Illuminate\Support\Facades\Auth;
 use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Forms\Components\TextInput;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Notifications\Notification;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\MultiSelectFilter;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Resource de gestion des tuteurs employés
- * 
+ *
  * Cette ressource permet aux administrateurs de gérer les tuteurs
  * ayant un statut d'employé ou privilégié dans le système.
  * Fonctionnalités :
@@ -43,7 +42,7 @@ class TuteursEmployesResource extends Resource
     {
         $user = Auth::user();
         return $user && Auth::user()->role === Roles::Administrator->value;
-    }     
+    }
 
     public static function getModelLabel(): string
     {
@@ -97,7 +96,7 @@ class TuteursEmployesResource extends Resource
                         Roles::Tutee->value => __('resources.tuteurs_employes.roles.tutee'),
                         default => 'Inconnu',
                     }),
-            ])            
+            ])
             ->filters([
                 MultiSelectFilter::make('role')
                     ->label(__('resources.tuteurs_employes.fields.role'))
@@ -133,7 +132,7 @@ class TuteursEmployesResource extends Resource
                             }
                         }
                         $record->update(['role' => Roles::Tutee->value]);
-                    }), 
+                    }),
                 Tables\Actions\Action::make('upgrade')
                     ->label(__('resources.tuteurs_employes.actions.upgrade'))
                     ->icon('heroicon-o-user-plus')

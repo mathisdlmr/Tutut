@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
 {
@@ -20,7 +19,7 @@ class SetLocale
         } elseif (session()->has('locale')) {
             app()->setLocale(session('locale'));
         }
-    
+
         return $next($request);
-    }    
+    }
 }

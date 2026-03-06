@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tutut-storage-pvc
+  namespace: tutut
+  labels:
+    app: tutut
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path # TODO : change with ceph-managed storageClass
+  resources:
+    requests:
+      storage: 5Gi

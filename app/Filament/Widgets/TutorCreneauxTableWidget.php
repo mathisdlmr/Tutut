@@ -2,17 +2,17 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Creneaux;
 use App\Enums\Roles;
-use Filament\Widgets\TableWidget as BaseWidget;
+use App\Models\Creneaux;
 use Filament\Tables;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\Auth;
 
 /**
  * Widget de visualisation des créneaux pour un tuteur
- * 
+ *
  * Ce widget affiche les créneaux à venir assignés au tuteur connecté.
  * Informations affichées pour chaque créneau :
  * - Date et jour
@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
  * - Tuteurs assignés (co-tuteurs)
  * - Nombre d'inscrits
  * - UVs demandées par les tutorés
- * 
+ *
  * Les créneaux sont regroupés par jour et horaire pour une meilleure organisation.
  */
 class TutorCreneauxTableWidget extends BaseWidget
@@ -62,7 +62,8 @@ class TutorCreneauxTableWidget extends BaseWidget
                     ->label(__('resources.widgets.tutor_creneaux.columns.day'))
                     ->icon('heroicon-o-calendar-days')
                     ->color('gray')
-                    ->formatStateUsing(fn($state, $record) =>
+                    ->formatStateUsing(
+                        fn ($state, $record) =>
                         ucfirst($record->start->translatedFormat('l d F Y'))
                     ),
                 Split::make([
@@ -70,7 +71,8 @@ class TutorCreneauxTableWidget extends BaseWidget
                         ->label(__('resources.widgets.tutor_creneaux.columns.schedule'))
                         ->icon('heroicon-o-clock')
                         ->color('gray')
-                        ->formatStateUsing(fn($state, $record) =>
+                        ->formatStateUsing(
+                            fn ($state, $record) =>
                             $record->start->format('H:i') . ' - ' . $record->end->format('H:i')
                         ),
                     TextColumn::make('salle.numero')
@@ -84,13 +86,13 @@ class TutorCreneauxTableWidget extends BaseWidget
                         ->icon('heroicon-o-user')
                         ->color('gray')
                         ->placeholder(__('resources.common.placeholders.none'))
-                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor1->lastName)[0].'.'),
+                        ->formatStateUsing(fn ($state, $record) => $state . ' ' .($record->tutor1->lastName)[0].'.'),
                     TextColumn::make('tutor2.firstName')
                         ->label(__('resources.widgets.tutor_creneaux.columns.tutor2'))
                         ->icon('heroicon-o-user')
                         ->color('gray')
                         ->placeholder(__('resources.common.placeholders.none'))
-                        ->formatStateUsing(fn($state, $record) => $state . ' ' .($record->tutor2->lastName)[0].'.'),
+                        ->formatStateUsing(fn ($state, $record) => $state . ' ' .($record->tutor2->lastName)[0].'.'),
                 ]),
                 TextColumn::make('inscriptions_count')
                     ->label(__('resources.widgets.tutor_creneaux.columns.registrations_count'))
@@ -102,7 +104,7 @@ class TutorCreneauxTableWidget extends BaseWidget
                     ->label(__('resources.widgets.tutor_creneaux.columns.requested_courses'))
                     ->formatStateUsing(function ($state, Creneaux $creneau) {
                         $uvs = $creneau->inscriptions
-                            ->flatMap(fn($inscription) => json_decode($inscription->enseignements_souhaites ?? '[]'))
+                            ->flatMap(fn ($inscription) => json_decode($inscription->enseignements_souhaites ?? '[]'))
                             ->filter()
                             ->unique()
                             ->sort()
@@ -131,7 +133,8 @@ class TutorCreneauxTableWidget extends BaseWidget
         return [
             Tables\Grouping\Group::make('day')
                 ->label(__('resources.widgets.tutor_creneaux.columns.day'))
-                ->getTitleFromRecordUsing(fn(Creneaux $record) =>
+                ->getTitleFromRecordUsing(
+                    fn (Creneaux $record) =>
                     ucfirst($record->start->translatedFormat('l d F Y'))
                 )
                 ->collapsible(false),

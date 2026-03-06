@@ -9,7 +9,7 @@ class Comptabilite extends Model
 {
     use HasFactory;
 
-    protected $table = 'comptabilite';  
+    protected $table = 'comptabilite';
 
     protected $fillable = [
         'nb_heures',
@@ -23,7 +23,7 @@ class Comptabilite extends Model
     {
         return $this->belongsTo(User::class, 'fk_user');
     }
-    
+
     public function semaine()
     {
         return $this->belongsTo(Semaine::class, 'fk_semaine');

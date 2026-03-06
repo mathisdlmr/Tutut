@@ -1,18 +1,19 @@
 <?php
+
 namespace App\Filament\Resources\Tutee;
 
 use App\Enums\Roles;
-use App\Models\UV;
+use App\Filament\Resources\Tutee\BecomeTutorResource\Pages\CreateBecomeTutorRequest;
 use App\Models\BecomeTutor;
+use App\Models\UV;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
-use App\Filament\Resources\Tutee\BecomeTutorResource\Pages\CreateBecomeTutorRequest;
 
 /**
  * Resource de demande pour devenir tuteur
- * 
+ *
  * Cette ressource permet aux tutorés de soumettre une demande pour
  * devenir tuteur dans le système.
  * Fonctionnalités :
@@ -26,27 +27,27 @@ use App\Filament\Resources\Tutee\BecomeTutorResource\Pages\CreateBecomeTutorRequ
 class BecomeTutorResource extends Resource
 {
     protected static ?string $model = BecomeTutor::class;
-    
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
-    
+
     public static function getNavigationLabel(): string
     {
         return __('resources.become_tutor.navigation_label');
     }
-    
+
     protected static ?int $navigationSort = 3;
 
     public static function canAccess(): bool
     {
         $user = Auth::user();
         return $user && Auth::user()->role === Roles::Tutee->value;
-    }  
-    
+    }
+
     public static function form(Form $form): Form
     {
         $currentUser = Auth::user();
         $existingRequest = $currentUser->becomeTutorRequest;
-        
+
         return $form
             ->schema([
                 Forms\Components\View::make('filament.components.refused.tutor-rejected')
@@ -95,7 +96,7 @@ class BecomeTutorResource extends Resource
                     ]),
             ]);
     }
-    
+
     public static function getPages(): array
     {
         return [

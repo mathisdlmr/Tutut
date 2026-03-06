@@ -2,20 +2,20 @@
 
 namespace App\Filament\Pages;
 
-use Filament\Pages\Page;
-use App\Models\UV;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Tables;
-use Filament\Tables\Table;
 use App\Enums\Roles;
 use App\Models\User;
+use App\Models\UV;
+use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Page de gestion des UVs pour les tuteurs
- * 
+ *
  * Cette page permet aux tuteurs de gérer les UVs (unités de valeur) qu'ils proposent d'enseigner.
  * Fonctionnalités:
  * - Sélection d'UVs existantes depuis le catalogue
@@ -36,7 +36,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
     public $selected_codes;
     public $code;
     public $intitule;
-    
+
     // Propriété réactive pour l'état du bouton
     public $canSaveUv = false;
 
@@ -45,7 +45,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
         return __('resources.pages.tutor_manage_uvs.title');
     }
 
-    public static function getNavigationLabel(): string 
+    public static function getNavigationLabel(): string
     {
         return __('resources.pages.tutor_manage_uvs.title');
     }
@@ -61,7 +61,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
         return $user && (Auth::user()->role === Roles::EmployedPrivilegedTutor->value
             || Auth::user()->role === Roles::EmployedTutor->value
             || Auth::user()->role === Roles::Tutor->value);
-    }    
+    }
 
     public function getLanguagesFormComponentProperty(): Form
     {
@@ -82,8 +82,8 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
                     ->columns(2)
             ])
             ->statePath('languagesForm');
-    }     
-    
+    }
+
     public function mount(): void
     {
         $this->languagesForm = [
@@ -92,9 +92,9 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
         $this->form->fill([
             'languages' => $this->languagesForm['languages'],
         ]);
-        
+
         $this->updateCanSaveUv();
-    }       
+    }
 
     public function formLanguagesForm(Form $form): Form
     {
@@ -118,20 +118,20 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
             ])
             ->statePath('languagesForm');
     }
-    
+
     public function updateLanguages(): void
     {
         $data = $this->languagesFormComponent->getState();
         Auth::user()->update([
             'languages' => $data['languages'] ?? [],
         ]);
-    
+
         Notification::make()
             ->title(__('resources.pages.tutor_manage_uvs.notifications.languages_updated_title'))
             ->success()
             ->body(__('resources.pages.tutor_manage_uvs.notifications.languages_updated_body'))
             ->send();
-    }      
+    }
 
     public function form(Form $form): Form
     {
@@ -157,7 +157,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
                         ->afterStateUpdated(fn () => $this->updateCanSaveUv())
                         ->requiredWithout(['code', 'intitule']),
                 ]),
-        
+
             Forms\Components\Section::make(__('resources.pages.tutor_manage_uvs.sections.create_new_uv.title'))
                 ->description(__('resources.pages.tutor_manage_uvs.sections.create_new_uv.description'))
                 ->schema([
@@ -167,7 +167,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
                     ->reactive()
                     ->afterStateUpdated(fn () => $this->updateCanSaveUv())
                     ->requiredWithout('selected_codes'),
-            
+
                     Forms\Components\TextInput::make('intitule')
                     ->label(__('resources.pages.tutor_manage_uvs.fields.intitule'))
                     ->maxLength(255)
@@ -179,19 +179,19 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
                 ->visible(fn () => Auth::user()->role === Roles::EmployedPrivilegedTutor->value),
         ])->statePath('');
     }
-    
+
     public function updateCanSaveUv(): void
     {
-        $this->canSaveUv = (!empty($this->selected_codes) && is_array($this->selected_codes)) || 
+        $this->canSaveUv = (!empty($this->selected_codes) && is_array($this->selected_codes)) ||
                           (!empty($this->code) && !empty($this->intitule));
     }
-    
+
     public function updated($property): void
     {
         if (in_array($property, ['selected_codes', 'code', 'intitule'])) {
             $this->updateCanSaveUv();
         }
-    }            
+    }
 
     public function createUv()
     {
@@ -223,7 +223,7 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
         $this->reset(['selected_codes', 'code', 'intitule']);
         $this->form->fill();
         $this->updateCanSaveUv();
-    }    
+    }
 
     public function table(Table $table): Table
     {

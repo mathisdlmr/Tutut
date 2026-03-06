@@ -16,7 +16,7 @@ class Creneaux extends Model
     protected $casts = [
         'start' => 'datetime',
         'end' => 'datetime',
-    ];    
+    ];
 
     public function tutor1()
     {
@@ -31,20 +31,20 @@ class Creneaux extends Model
     public function salle()
     {
         return $this->belongsTo(Salle::class, 'fk_salle', 'numero');
-    }    
+    }
 
     public function semaine()
     {
         return $this->belongsTo(Semaine::class, 'fk_semaine');
-    }   
-    
+    }
+
     public function inscriptions()
     {
         return $this->hasMany(Inscription::class, 'creneau_id');
-    }    
+    }
 
     public function inscriptionsCount()
     {
         return $this->inscriptions()->count();
-    }    
+    }
 }

@@ -3,19 +3,19 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\Roles;
-use Illuminate\Support\Facades\Auth;
-use Filament\Widgets\StatsOverviewWidget;
+use App\Models\Comptabilite;
 use App\Models\Creneaux;
 use App\Models\Inscription;
-use App\Models\Comptabilite;
-use App\Models\Semestre;
 use App\Models\Semaine;
+use App\Models\Semestre;
 use App\Models\User;
+use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Widget de tableau de bord administrateur
- * 
+ *
  * Ce widget affiche des statistiques clés pour les administrateurs concernant
  * l'utilisation de la plateforme.
  * Statistiques présentées :
@@ -106,4 +106,3 @@ class AdminWidget extends StatsOverviewWidget
         ];
     }
 }
-

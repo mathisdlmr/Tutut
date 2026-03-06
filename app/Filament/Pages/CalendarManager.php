@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Auth;
 
 /**
  * Page de gestion du calendrier
- * 
+ *
  * Cette page permet aux administrateurs et tuteurs privilégiés de gérer le calendrier,
  * en définissant des exceptions dans le planning (jours fériés, modifications ponctuelles).
  * Fonctionnalités:
@@ -62,9 +62,9 @@ class CalendarManager extends Page
         $user = Auth::user();
         return $user && (Auth::user()->role === Roles::Administrator->value ||
                Auth::user()->role === Roles::EmployedPrivilegedTutor->value);
-    }   
+    }
 
-    protected function getFormSchema(): array 
+    protected function getFormSchema(): array
     {
         $activeSemestre = Semestre::getActive();
         $dateConstraints = [];
@@ -162,12 +162,12 @@ class CalendarManager extends Page
     protected function getViewData(): array
     {
         $this->initializeCalendar();
-        
+
         $activeSemestre = Semestre::getActive();
-        
+
         $locale = app()->getLocale();
         $carbonLocale = $locale === 'fr' ? 'fr_FR' : 'en_US';
-        
+
         return [
             'monthName' => Carbon::parse($this->currentMonth)->locale($carbonLocale)->isoFormat('MMMM YYYY'),
             'daysOfWeek' => $this->daysOfWeek,
@@ -181,14 +181,14 @@ class CalendarManager extends Page
     public function mount()
     {
         $activeSemestre = Semestre::getActive();
-        
+
         if ($activeSemestre) {
             $semestreStart = Carbon::parse($activeSemestre->debut);
             $semestreEnd = Carbon::parse($activeSemestre->fin);
-            
+
             $this->semestreStartMonth = $semestreStart->format('Y-m');
             $this->semestreEndMonth = $semestreEnd->format('Y-m');
-            
+
             $now = now();
             if ($now->lt($semestreStart)) {
                 $this->currentMonth = $this->semestreStartMonth;
@@ -200,7 +200,7 @@ class CalendarManager extends Page
         } else {
             $this->currentMonth = now()->format('Y-m');
         }
-        
+
         $this->initializeCalendar();
         $this->loadAllOverrides();
     }
@@ -210,31 +210,31 @@ class CalendarManager extends Page
         if (!$this->semestreStartMonth) {
             return true;
         }
-        
+
         $currentMonth = Carbon::parse($this->currentMonth);
         $semestreStart = Carbon::parse($this->semestreStartMonth);
-        
-        return $currentMonth->gt($semestreStart) || 
+
+        return $currentMonth->gt($semestreStart) ||
                ($currentMonth->year == $semestreStart->year && $currentMonth->month == $semestreStart->month);
     }
-    
+
     private function canNavigateToNextMonth()
     {
         if (!$this->semestreEndMonth) {
             return true;
         }
-        
+
         $currentMonth = Carbon::parse($this->currentMonth);
         $semestreEnd = Carbon::parse($this->semestreEndMonth);
-        
-        return $currentMonth->lt($semestreEnd) || 
+
+        return $currentMonth->lt($semestreEnd) ||
                ($currentMonth->year == $semestreEnd->year && $currentMonth->month == $semestreEnd->month);
     }
 
     public function loadExistingOverride($date)
     {
         $override = CalendarOverride::where('date', Carbon::parse($date))->first();
-        
+
         if ($override) {
             $this->isHoliday = $override->is_holiday;
             $this->selectedDayTemplate = $override->is_holiday ? null : $override->day_template;
@@ -256,12 +256,12 @@ class CalendarManager extends Page
             $selectedDate = Carbon::parse($date);
             $debut = Carbon::parse($activeSemestre->debut);
             $fin = Carbon::parse($activeSemestre->fin);
-            
+
             if ($selectedDate->lt($debut) || $selectedDate->gt($fin)) {
                 return;
             }
         }
-        
+
         $this->selectedDate = $date;
         $this->loadExistingOverride($date);
     }
@@ -272,14 +272,14 @@ class CalendarManager extends Page
             $targetMonth = Carbon::parse($month);
             $startMonth = Carbon::parse($this->semestreStartMonth);
             $endMonth = Carbon::parse($this->semestreEndMonth);
-            
+
             if ($targetMonth->lt($startMonth->startOfMonth())) {
                 $month = $this->semestreStartMonth;
             } elseif ($targetMonth->gt($endMonth->endOfMonth())) {
                 $month = $this->semestreEndMonth;
             }
         }
-        
+
         $this->currentMonth = $month;
         $this->loadAllOverrides();
     }
@@ -295,7 +295,7 @@ class CalendarManager extends Page
             $selectedDate = Carbon::parse($this->selectedDate);
             $debut = Carbon::parse($activeSemestre->debut);
             $fin = Carbon::parse($activeSemestre->fin);
-            
+
             if ($selectedDate->lt($debut) || $selectedDate->gt($fin)) {
                 Notification::make()
                     ->title(__('pages.calendar_manager.date_out_of_range'))
@@ -332,7 +332,7 @@ class CalendarManager extends Page
         }
 
         CalendarOverride::where('date', Carbon::parse($this->selectedDate))->delete();
-        
+
         $this->loadAllOverrides();
         $this->isHoliday = false;
         $this->selectedDayTemplate = null;
@@ -346,7 +346,7 @@ class CalendarManager extends Page
     private function initializeCalendar()
     {
         $locale = app()->getLocale();
-        
+
         if ($locale === 'fr') {
             $this->daysOfWeek = [
                 'Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di'
@@ -364,7 +364,7 @@ class CalendarManager extends Page
         $endDate = Carbon::parse($this->currentMonth)->endOfMonth();
 
         $overrides = CalendarOverride::whereBetween('date', [$startDate, $endDate])->get();
-        
+
         $this->overrides = [];
         foreach ($overrides as $override) {
             $this->overrides[$override->date->format('Y-m-d')] = [
@@ -378,41 +378,41 @@ class CalendarManager extends Page
     {
         $startOfMonth = Carbon::parse($this->currentMonth)->startOfMonth();
         $endOfMonth = Carbon::parse($this->currentMonth)->endOfMonth();
-        
+
         $calendarStart = $startOfMonth->copy();
         if ($calendarStart->dayOfWeek !== 1) {
             $calendarStart->previous(Carbon::MONDAY);
         }
-        
+
         $calendarEnd = $endOfMonth->copy();
         if ($calendarEnd->dayOfWeek !== 0) {
             $calendarEnd->next(Carbon::SUNDAY);
         }
-        
+
         $activeSemestre = Semestre::getActive();
         $semestreStartDate = $activeSemestre ? Carbon::parse($activeSemestre->debut) : null;
         $semestreEndDate = $activeSemestre ? Carbon::parse($activeSemestre->fin) : null;
-        
+
         $days = [];
         $currentDay = $calendarStart->copy();
-        
+
         while ($currentDay <= $calendarEnd) {
             $weekNum = $currentDay->weekOfYear;
-            
+
             if (!isset($days[$weekNum])) {
                 $days[$weekNum] = [];
             }
-            
+
             $date = $currentDay->format('Y-m-d');
             $isCurrentMonth = $currentDay->month === Carbon::parse($this->currentMonth)->month;
             $isToday = $currentDay->isToday();
             $isSelected = $date === $this->selectedDate;
-            
+
             $inActiveSemestre = true;
             if ($activeSemestre) {
                 $inActiveSemestre = $currentDay->between($semestreStartDate, $semestreEndDate);
             }
-            
+
             $dayData = [
                 'date' => $date,
                 'day' => $currentDay->day,
@@ -422,11 +422,11 @@ class CalendarManager extends Page
                 'inActiveSemestre' => $inActiveSemestre,
                 'override' => isset($this->overrides[$date]) ? $this->overrides[$date] : null,
             ];
-            
+
             $days[$weekNum][] = $dayData;
             $currentDay->addDay();
         }
-        
+
         return $days;
     }
 }

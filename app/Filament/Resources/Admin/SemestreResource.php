@@ -3,22 +3,22 @@
 namespace App\Filament\Resources\Admin;
 
 use App\Enums\Roles;
-use Illuminate\Support\Facades\Auth;
+use App\Filament\Resources\Admin\SemestreResource\Pages;
 use App\Models\Semestre;
-use Filament\Forms;
-use Filament\Tables;
 use Carbon\Carbon;
-use Filament\Resources\Resource;
+use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Form;
-use Filament\Tables\Table;
+use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\DatePicker;
-use App\Filament\Resources\Admin\SemestreResource\Pages;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Resource de gestion des semestres
- * 
+ *
  * Cette ressource permet aux administrateurs et tuteurs privilégiés
  * de gérer les semestres académiques.
  * Fonctionnalités :
@@ -54,7 +54,7 @@ class SemestreResource extends Resource
         $user = Auth::user();
         return $user && (Auth::user()->role === Roles::Administrator->value ||
                Auth::user()->role === Roles::EmployedPrivilegedTutor->value);
-    }     
+    }
 
     public static function form(Form $form): Form
     {
@@ -113,12 +113,12 @@ class SemestreResource extends Resource
             ->columns([
                 TextColumn::make('code')
                     ->label(__('resources.admin.semestre.fields.code'))
-                    ->searchable(),                    
+                    ->searchable(),
                 TextColumn::make('is_active')
                     ->label(__('resources.admin.semestre.fields.is_active'))
                     ->formatStateUsing(fn (bool $state) => $state ? __('resources.admin.semestre.values.oui') : __('resources.admin.semestre.values.non'))
                     ->badge()
-                    ->color(fn (bool $state) => $state ? 'success' : 'gray'),  
+                    ->color(fn (bool $state) => $state ? 'success' : 'gray'),
                 TextColumn::make('debut')
                     ->label(__('resources.admin.semestre.fields.debut'))
                     ->formatStateUsing(fn (string $state) => Carbon::parse($state)->locale('fr')->translatedFormat('l d F Y')),

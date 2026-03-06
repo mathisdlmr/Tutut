@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum Roles : string
+enum Roles: string
 {
     case Administrator = 'admin';
     case EmployedPrivilegedTutor = 'employedPrivilegedTutor';
