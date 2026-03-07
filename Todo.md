@@ -2,7 +2,6 @@
 
 ## Finir le déploiement
 
-- [ ] Passer la couleur de la dark:font-white dans le tuto md
 - [ ] Vérifier l'utilisation des semestres passés
 - [ ] Voir si un mail Laravel peut avoir 50 destinataires d'un coup
 - [ ] Ajouter des commentaires en inline
