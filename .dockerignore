@@ -2,6 +2,7 @@
 /vendor
 /public/build
 /storage/app/private
+/storage/app/keys/*
 .env
 .env.example
 .php-cs-fixer.cache
