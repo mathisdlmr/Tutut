@@ -4,6 +4,8 @@
 /storage/app/private
 .env
 .env.example
+.php-cs-fixer.cache
+.php-cs-fixer.php
 .git/
 .github/
 .gitignore
@@ -11,3 +13,4 @@
 Dockerfile
 docker-compose.yaml
 README.md
+Todo.md

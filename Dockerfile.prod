@@ -50,7 +50,7 @@ COPY prod/laravel-entrypoint.sh /usr/local/bin/laravel-entrypoint.sh
 RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
 
 RUN addgroup --gid 1000 www \
-    && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password www \
+    && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password --gecos "" www \
     && chown -R www:www /var/www/html \
     && chmod -R 775 storage bootstrap/cache \
     && chown -R www:www /var/lib/nginx /var/log/nginx /run
