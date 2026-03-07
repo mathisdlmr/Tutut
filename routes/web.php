@@ -1,12 +1,19 @@
 <?php
 
-use App\Http\Controllers\RgpdController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RgpdController;
+
+/**************************************************** Healthz ****************************************************/
+Route::get('/healthz', function () {
+    return 'ok';
+});
+/**************************************************************************************************************************/
 
 /**************************************************** Authentification ****************************************************/
-Route::get('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login');
-Route::get('/callback', [\App\Http\Controllers\AuthController::class, 'callback'])->name('callback');
-Route::get('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/callback', [AuthController::class, 'callback'])->name('callback');
+Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 /**************************************************************************************************************************/
 
 /**************************************************** RGPD ****************************************************/
