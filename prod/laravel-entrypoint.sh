@@ -1,18 +1,6 @@
 #!/bin/sh
 set -eu
 
-until php -r "
-  \$pdo = new PDO(
-    'mysql:host=' . getenv('DB_HOST') . ';port=' . (getenv('DB_PORT') ?: 3306),
-    getenv('DB_USERNAME'),
-    getenv('DB_PASSWORD')
-  );
-  echo 'MySQL prêt.' . PHP_EOL;
-" 2>/dev/null; do
-  echo "MySQL indisponible - nouvelle tentative dans 5s..."
-  sleep 5
-done
-
 php artisan config:clear || true
 php artisan cache:clear  || true
 php artisan route:clear  || true
