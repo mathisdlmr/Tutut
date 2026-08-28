@@ -28,6 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-install \
         intl pdo pdo_mysql mysqli pdo_sqlite pdo_pgsql pgsql \
         xml zip gd opcache \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -52,9 +54,11 @@ RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
 
 RUN addgroup --gid 1000 www \
     && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password --gecos "" www \
-    && chown -R www:www /var/www/html \
-    && chmod -R 775 storage bootstrap/cache \
-    && chown -R www:www /var/lib/nginx /var/log/nginx /run
+    && usermod -aG root www \
+    && chgrp -R 0 /var/www/html /var/lib/nginx /var/log/nginx /run \
+    && chmod -R g=u /var/www/html /var/lib/nginx /var/log/nginx /run
+
+USER 1000
 
 EXPOSE 8080
 
