@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Roles;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
@@ -15,13 +16,14 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->provider = new GenericProvider([
-            'clientId' => config('auth.oauth.client_id'),
-            'clientSecret' => config('auth.oauth.client_secret'),
-            'redirectUri' => config('auth.oauth.redirect_uri'),
-            'urlAuthorize' => config('auth.oauth.authorize_url'),
-            'urlAccessToken' => config('auth.oauth.access_token_url'),
-            'urlResourceOwnerDetails' => config('auth.oauth.owner_details_url'),
-            'scopes' => config('auth.oauth.scopes'),
+            'clientId' => config('auth.oidc.client_id'),
+            'clientSecret' => config('auth.oidc.client_secret'),
+            'redirectUri' => config('auth.oidc.redirect_uri'),
+            'urlAuthorize' => config('auth.oidc.authorize_url'),
+            'urlAccessToken' => config('auth.oidc.access_token_url'),
+            'urlResourceOwnerDetails' => config('auth.oidc.owner_details_url'),
+            'scopes' => config('auth.oidc.scopes'),
+            'pkceMethod' => GenericProvider::PKCE_METHOD_S256,
         ]);
     }
 
@@ -41,18 +43,20 @@ class AuthController extends Controller
         }
 
         $state = bin2hex(random_bytes(16));
-        $request->session()->put('oauth2state', $state);
+        $request->session()->put('oidc_state', $state);
 
         $authorizationUrl = $this->provider->getAuthorizationUrl([
-            'state' => $state
+            'state' => $state,
         ]);
+        // PKCE code is like a random S256 session/state used to avoid interception
+        $request->session()->put('oidc_pkce_code', $this->provider->getPkceCode());
 
         return redirect($authorizationUrl);
     }
 
     public function callback(Request $request)
     {
-        $storedState = $request->session()->pull('oauth2state');
+        $storedState = $request->session()->pull('oidc_state');
 
         if (!$request->has('state') || $request->get('state') !== $storedState) {
             abort(400, 'Invalid state: ' . $request->get('state') . ' VS ' . $storedState);
@@ -61,22 +65,34 @@ class AuthController extends Controller
         if (!$request->has('code')) {
             abort(400, 'No authorization code');
         }
+
+        $pkceCode = $request->session()->pull('oidc_pkce_code');
+        $this->provider->setPkceCode($pkceCode);
+
         try {
             $accessToken = $this->provider->getAccessToken('authorization_code', [
                 'code' => $request->get('code'),
             ]);
 
             $resourceOwner = $this->provider->getResourceOwner($accessToken);
-            $userDetails = $resourceOwner->toArray();
+            $claims = $resourceOwner->toArray();
 
-            if ($userDetails['deleted_at'] != null || $userDetails['active'] != 1) {
-                abort(401, 'Compte supprimé ou désactivé');
+            if (empty($claims['email'])) {
+                abort(401, 'Email absent des informations renvoyées par le CAS');
             }
 
-            $user = User::where('email', $userDetails['email'])->first();
-            if (!$user->firstName) {
-                $user->firstName = $userDetails['firstName'];
-                $user->lastName = $userDetails['lastName'];
+            $user = User::firstOrCreate(
+                ['email' => $claims['email']],
+                [
+                    'firstName' => $claims['given_name'] ?? null,
+                    'lastName' => $claims['family_name'] ?? null,
+                    'role' => Roles::Tutee->value,
+                ]
+            );
+
+            if (!$user->firstName && !empty($claims['given_name'])) {
+                $user->firstName = $claims['given_name'];
+                $user->lastName = $claims['family_name'] ?? null;
                 $user->save();
             }
 
@@ -91,6 +107,6 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::logout();
-        return redirect(config('auth.oauth.logout_url'));
+        return redirect(config('auth.oidc.logout_url'));
     }
 }

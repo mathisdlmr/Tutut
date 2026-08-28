@@ -5,15 +5,17 @@ return [
     'app_no_login' => env('APP_NO_LOGIN', false),
     'auto_user_id' => env('USER_ID', 1),
 
-    'oauth' => [
-        'client_id' => env('OAUTH_CLIENT_ID'),
-        'client_secret' => env('OAUTH_CLIENT_SECRET'),
-        'redirect_uri' => env('OAUTH_REDIRECT_URI', env('BASE_URL').'tutut/auth/callback'),
-        'scopes' => env('OAUTH_SCOPES', 'users-infos'),
-        'authorize_url' => env('OAUTH_AUTHORIZE_URL', 'https://auth.assos.utc.fr/oauth/authorize'),
-        'access_token_url' => env('OAUTH_ACCESS_TOKEN_URL', 'https://auth.assos.utc.fr/oauth/token'),
-        'owner_details_url' => env('OAUTH_RESOURCE_OWNER_DETAILS', 'https://auth.assos.utc.fr/api/user'),
-        'logout_url' => env('OAUTH_LOGOUT_URL', 'https://auth.assos.utc.fr/logout'),
+    // CAS UTC, exposed as OIDC - endpoints below come straight from
+    // https://cas.utc.fr/cas/oidc/.well-known/openid-configuration
+    'oidc' => [
+        'client_id' => env('OIDC_CLIENT_ID'),
+        'client_secret' => env('OIDC_CLIENT_SECRET'),
+        'redirect_uri' => env('OIDC_REDIRECT_URI', env('APP_URL').'/callback'),
+        'scopes' => env('OIDC_SCOPES', 'openid profile email'),
+        'authorize_url' => env('OIDC_AUTHORIZE_URL', 'https://cas.utc.fr/cas/oidc/oidcAuthorize'),
+        'access_token_url' => env('OIDC_ACCESS_TOKEN_URL', 'https://cas.utc.fr/cas/oidc/oidcAccessToken'),
+        'owner_details_url' => env('OIDC_RESOURCE_OWNER_DETAILS', 'https://cas.utc.fr/cas/oidc/oidcProfile'),
+        'logout_url' => env('OIDC_LOGOUT_URL', 'https://cas.utc.fr/cas/oidc/oidcLogout'),
     ],
 
     /*
