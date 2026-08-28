@@ -52,12 +52,15 @@ COPY prod/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY prod/laravel-entrypoint.sh /usr/local/bin/laravel-entrypoint.sh
 RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
 
+# Remove default nginx config to free port 80
+RUN rm -f /etc/nginx/sites-enabled/default
+
+# Setting up the user
 RUN addgroup --gid 1000 www \
     && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password --gecos "" www \
     && usermod -aG root www \
     && chgrp -R 0 /var/www/html /var/lib/nginx /var/log/nginx /run \
     && chmod -R g=u /var/www/html /var/lib/nginx /var/log/nginx /run
-
 USER 1000
 
 EXPOSE 8080
