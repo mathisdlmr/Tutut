@@ -11,7 +11,7 @@ return [
         'client_id' => env('OIDC_CLIENT_ID'),
         'client_secret' => env('OIDC_CLIENT_SECRET'),
         'redirect_uri' => env('OIDC_REDIRECT_URI', env('APP_URL').'/callback'),
-        'scopes' => env('OIDC_SCOPES', 'openid profile email'),
+        'scopes' => env('OIDC_SCOPES', ['openid','profile','email']),
         'authorize_url' => env('OIDC_AUTHORIZE_URL', 'https://cas.utc.fr/cas/oidc/oidcAuthorize'),
         'access_token_url' => env('OIDC_ACCESS_TOKEN_URL', 'https://cas.utc.fr/cas/oidc/oidcAccessToken'),
         'owner_details_url' => env('OIDC_RESOURCE_OWNER_DETAILS', 'https://cas.utc.fr/cas/oidc/oidcProfile'),
