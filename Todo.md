@@ -1,10 +1,14 @@
-# Propositions d'amélioration
+# Propositions d'amélioration   
 
-## Finir le déploiement
+## Des vérifications
 
-- [ ] Vérifier l'utilisation des semestres passés
+- [ ] Vérifier l'utilisation des semestres passés, pour les heures réalisées, les inscriptions, etc. (en clair, que les archives soient utilisables)
 - [ ] Voir si un mail Laravel peut avoir 50 destinataires d'un coup
 - [ ] Ajouter des commentaires en inline
+
+## Côté Dév
+
+- [ ] Déployer une interface pour manipuler la DB, un Adminer ou PgAdmin
 
 ## UI
 
