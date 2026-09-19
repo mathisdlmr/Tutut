@@ -162,21 +162,14 @@ class SemaineResource extends Resource
                             return false;
                         }
 
-                        $semaines = Semaine::where('fk_semestre', $semestre->code)
-                            ->orderByDesc('numero')
-                            ->get();
+                        $semaines = Semaine::where('fk_semestre', $semestre->code)->get();
 
-                        $dernierNumero = 0;
-                        foreach ($semaines as $semaine) {
-                            if ($semaine->numero !== 'X') {
-                                $dernierNumero = is_numeric($semaine->numero) ? intval($semaine->numero) : 0;
-                                break;
-                            }
-                        }
+                        $dernierNumero = $semaines
+                            ->reject(fn ($semaine) => $semaine->numero === 'X')
+                            ->map(fn ($semaine) => is_numeric($semaine->numero) ? intval($semaine->numero) : 0)
+                            ->max() ?? 0;
 
-                        $lastWeek = Semaine::where('fk_semestre', $semestre->code)
-                            ->orderByDesc('numero')
-                            ->first();
+                        $lastWeek = $semaines->sortByDesc('date_fin')->first();
 
                         if ($lastWeek && $lastWeek->date_fin) {
                             $date_debut = \Carbon\Carbon::parse($lastWeek->date_fin)->addDay();
