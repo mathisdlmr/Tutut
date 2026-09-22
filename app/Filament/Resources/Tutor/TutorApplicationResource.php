@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Tutor;
 
 use App\Enums\Roles;
 use App\Models\BecomeTutor;
+use App\Models\Semestre;
 use Filament\Infolists\Components;
 use Filament\Infolists\Infolist;
 use Filament\Notifications\Notification;
@@ -60,6 +61,19 @@ class TutorApplicationResource extends Resource
     public static function getNavigationGroup(): string
     {
         return __('resources.tutor_application.navigation_group');
+    }
+
+    /**
+     * Définit le badge de navigation pour la ressource
+     * (un petit badge à côté du nom)
+     *
+     * @return string Le contenu du badge
+     */
+
+    public static function getNavigationBadge(): ?string
+    {
+        $pendingRequest = BecomeTutor::where('semester', Semestre::getActive()->code)->where('status', 'pending')->count();
+        return $pendingRequest > 0 ? $pendingRequest : null;
     }
 
     /**

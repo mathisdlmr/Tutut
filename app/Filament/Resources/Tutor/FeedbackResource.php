@@ -47,6 +47,18 @@ class FeedbackResource extends Resource
     }
 
     /**
+     * Définit le badge de navigation pour la ressource
+     * (un petit badge à côté du nom)
+     *
+     * @return string Le contenu du badge
+     */
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Feedback::query()->count();
+    }
+
+    /**
      * Configure le formulaire de création/édition des feedbacks
      *
      * Le formulaire inclut un champ caché pour l'ID du tutoré et un

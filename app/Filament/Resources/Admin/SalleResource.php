@@ -33,6 +33,7 @@ class SalleResource extends Resource
 {
     protected static ?string $model = Salle::class;
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?int $navigationSort = 3;
 
     public static function getModelLabel(): string
     {
@@ -49,7 +50,17 @@ class SalleResource extends Resource
         return __('resources.admin.navigation_group.gestion');
     }
 
-    protected static ?int $navigationSort = 3;
+    /**
+     * Définit le badge de navigation pour la ressource
+     * (un petit badge à côté du nom)
+     *
+     * @return string Le contenu du badge
+     */
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Salle::query()->count();
+    }
 
     public static function canAccess(): bool
     {

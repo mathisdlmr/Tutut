@@ -49,6 +49,18 @@ class SemestreResource extends Resource
         return __('resources.admin.navigation_group.gestion');
     }
 
+    /**
+     * Définit le badge de navigation pour la ressource
+     * (un petit badge à côté du nom)
+     *
+     * @return string Le contenu du badge
+     */
+
+    public static function getNavigationBadge(): ?string
+    {
+        return Semestre::getActive()?->code;
+    }
+
     public static function canAccess(): bool
     {
         $user = Auth::user();
@@ -66,6 +78,7 @@ class SemestreResource extends Resource
                         ->required()
                         ->maxLength(3)
                         ->placeholder('A25')
+                        ->disabled(fn (?Semestre $record) => $record !== null)
                         ->columnSpan(1),
 
                     Forms\Components\DatePicker::make('debut')

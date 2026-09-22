@@ -38,6 +38,7 @@ class SemaineResource extends Resource
 {
     protected static ?string $model = Semaine::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static ?int $navigationSort = 1;
 
     /**
      * Définit le label singulier de la ressource
@@ -68,8 +69,18 @@ class SemaineResource extends Resource
     {
         return __('resources.admin.navigation_group.gestion');
     }
+    
+    /**
+     * Définit le badge de navigation pour la ressource
+     * (un petit badge à côté du nom)
+     *
+     * @return string Le contenu du badge
+     */
 
-    protected static ?int $navigationSort = 1;
+    public static function getNavigationBadge(): ?string
+    {
+        return Semaine::where('fk_semestre', Semestre::getActive()->code)->count();
+    }
 
     /**
      * Vérifie si l'utilisateur peut accéder à cette ressource
