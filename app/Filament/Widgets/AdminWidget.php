@@ -12,6 +12,7 @@ use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 
 /**
  * Widget de tableau de bord administrateur
@@ -102,7 +103,10 @@ class AdminWidget extends StatsOverviewWidget
             Stat::make(__('resources.widgets.admin.stats.open_slots_per_week'), $creneauxParSemaine->avg() ? round($creneauxParSemaine->avg(), 2) : 0),
             Stat::make(__('resources.widgets.admin.stats.volunteer_tutors'), $nbTuteursBénévoles),
             Stat::make(__('resources.widgets.admin.stats.total_hours'), round($heuresTotales, 1) . 'h'),
-            Stat::make(__('resources.widgets.admin.stats.most_requested_courses'), $topUVs ?: __('resources.common.placeholders.none')),
+            Stat::make(
+                __('resources.widgets.admin.stats.most_requested_courses'),
+                new HtmlString('<span class="text-base font-semibold">' . e($topUVs ?: __('resources.common.placeholders.none')) . '</span>')
+            ),
         ];
     }
 }
