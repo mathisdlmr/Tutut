@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\Roles;
 use App\Models\CalendarOverride;
+use App\Models\Semaine;
 use App\Models\Semestre;
 use Carbon\Carbon;
 use Filament\Forms;
@@ -393,6 +394,30 @@ class CalendarManager extends Page
         $semestreStartDate = $activeSemestre ? Carbon::parse($activeSemestre->debut) : null;
         $semestreEndDate = $activeSemestre ? Carbon::parse($activeSemestre->fin) : null;
 
+        $examPeriods = [];
+        if ($activeSemestre) {
+            if ($activeSemestre->debut_medians && $activeSemestre->fin_medians) {
+                $examPeriods[] = [
+                    Carbon::parse($activeSemestre->debut_medians)->startOfDay(),
+                    Carbon::parse($activeSemestre->fin_medians)->endOfDay(),
+                ];
+            }
+            if ($activeSemestre->debut_finaux && $activeSemestre->fin_finaux) {
+                $examPeriods[] = [
+                    Carbon::parse($activeSemestre->debut_finaux)->startOfDay(),
+                    Carbon::parse($activeSemestre->fin_finaux)->endOfDay(),
+                ];
+            }
+        }
+
+        $vacancesWeeks = $activeSemestre
+            ? Semaine::where('fk_semestre', $activeSemestre->code)
+                ->where('is_vacances', true)
+                ->whereNotNull('date_debut')
+                ->whereNotNull('date_fin')
+                ->get(['date_debut', 'date_fin'])
+            : collect();
+
         $days = [];
         $currentDay = $calendarStart->copy();
 
@@ -413,6 +438,14 @@ class CalendarManager extends Page
                 $inActiveSemestre = $currentDay->between($semestreStartDate, $semestreEndDate);
             }
 
+            $isVacances = $vacancesWeeks->contains(
+                fn ($week) => $currentDay->between($week->date_debut->copy()->startOfDay(), $week->date_fin->copy()->endOfDay())
+            );
+
+            $isExamPeriod = !$isVacances && collect($examPeriods)->contains(
+                fn ($period) => $currentDay->between($period[0], $period[1])
+            );
+
             $dayData = [
                 'date' => $date,
                 'day' => $currentDay->day,
@@ -420,6 +453,8 @@ class CalendarManager extends Page
                 'isToday' => $isToday,
                 'isSelected' => $isSelected,
                 'inActiveSemestre' => $inActiveSemestre,
+                'isVacances' => $isVacances,
+                'isExamPeriod' => $isExamPeriod,
                 'override' => isset($this->overrides[$date]) ? $this->overrides[$date] : null,
             ];
 
