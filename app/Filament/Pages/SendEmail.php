@@ -30,7 +30,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-paper-airplane';
     protected static string $view = 'filament.pages.send-email';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public $template;
     public $templateName;

@@ -31,7 +31,7 @@ class TutorApplicationResource extends Resource
 {
     protected static ?string $model = BecomeTutor::class;
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 2;
 
     /**
      * Obtient le label du modèle pour la ressource

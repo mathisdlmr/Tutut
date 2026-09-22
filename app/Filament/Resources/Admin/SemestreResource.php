@@ -32,7 +32,7 @@ class SemestreResource extends Resource
 {
     protected static ?string $model = Semestre::class;
     protected static ?string $navigationIcon = 'heroicon-o-circle-stack';
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 6;
 
     public static function getModelLabel(): string
     {
