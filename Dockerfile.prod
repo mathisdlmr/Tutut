@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libonig-dev libsqlite3-dev libmariadb-dev \
     g++ make autoconf \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install \
         intl pdo pdo_mysql mysqli pdo_sqlite pdo_pgsql pgsql \
         xml zip gd opcache \
