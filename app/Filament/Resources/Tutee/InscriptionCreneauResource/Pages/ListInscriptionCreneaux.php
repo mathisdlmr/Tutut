@@ -90,6 +90,38 @@ class ListInscriptionCreneaux extends ListRecords
     }
 
     /**
+     * Affiche en haut de page les délais d'inscription et de désinscription
+     * définis dans les paramètres généraux
+     *
+     * @return string|null Le texte descriptif des délais
+     */
+    public function getSubheading(): ?string
+    {
+        $registrationSettings = $this->getRegistrationSettings();
+        $cancellationSettings = InscriptionCreneauResource::getSettings();
+
+        $registrationDay = strtolower($registrationSettings['tuteeRegistrationDay'] ?? 'sunday');
+        $registrationTime = $registrationSettings['tuteeRegistrationTime'] ?? '16:00';
+        $dayLabel = __('resources.pages.settings.days.' . $registrationDay);
+
+        if ($cancellationSettings['useOneDayBeforeCancellation'] ?? false) {
+            $cancellationText = __('resources.inscription_creneau.cancellation_day_before');
+        } elseif (!empty($cancellationSettings['minTimeCancellationTime'])) {
+            $cancellationText = __('resources.inscription_creneau.cancellation_time_before', [
+                'time' => $cancellationSettings['minTimeCancellationTime'],
+            ]);
+        } else {
+            $cancellationText = __('resources.inscription_creneau.cancellation_none');
+        }
+
+        return __('resources.inscription_creneau.registration_delay_info', [
+            'day' => $dayLabel,
+            'time' => $registrationTime,
+            'cancellation' => $cancellationText,
+        ]);
+    }
+
+    /**
      * Détermine si la semaine actuelle et la semaine suivante doivent être affichées
      *
      * Cette méthode vérifie, en fonction des paramètres de configuration,
