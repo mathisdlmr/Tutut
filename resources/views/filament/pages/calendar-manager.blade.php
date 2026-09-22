@@ -13,6 +13,15 @@
             </div>
         @endif
         <h2 class="text-xl font-semibold text-center capitalize">{{ $monthName }}</h2>
+        @if($nextMonth)
+            <button wire:click="changeMonth('{{ $nextMonth }}')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                <span>{{ __('pages.calendar_manager.next_month') }} &rarr;</span>
+            </button>
+        @else
+            <div class="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed rounded-md">
+                <span>{{ __('pages.calendar_manager.next_month') }} &rarr;</span>
+            </div>
+        @endif
     </div>
     <div class="flex flex-wrap gap-x-4 gap-y-1 mb-4 text-sm text-gray-600 dark:text-gray-300">
         <span class="flex items-center gap-x-1.5">
@@ -28,17 +37,6 @@
             {{ __('pages.calendar_manager.legend_modified') }}
         </span>
     </div>
-    <div>
-        @if($nextMonth)
-            <button wire:click="changeMonth('{{ $nextMonth }}')" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                <span>{{ __('pages.calendar_manager.next_month') }} &rarr;</span>
-            </button>
-        @else
-            <div class="px-4 py-2 bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed rounded-md">
-                <span>{{ __('pages.calendar_manager.next_month') }} &rarr;</span>
-            </div>
-        @endif
-    </div>
     <div class="grid grid-cols-7 gap-1">
         @foreach ($daysOfWeek as $dayName)
             <div class="p-1 text-center font-medium text-gray-600 dark:text-gray-300">
@@ -52,7 +50,7 @@
                         ? 'day-modified'
                         : (($day['isVacances'] ?? false)
                             ? 'vacances-period'
-                            : (($day['isExamPeriod'] ?? false) ? 'exam-period' : ''));
+                            : ($day['examPeriodLabel'] ?? null ? 'exam-period' : ''));
                 @endphp
                 <div
                     @if($day['inActiveSemestre'])
@@ -77,6 +75,14 @@
                                     {{ ucfirst(substr($day['override']['day_template'], 0, 3)) }}
                                 </span>
                             @endif
+                        @elseif ($day['isVacances'] ?? false)
+                            <span class="text-base text-blue-600 dark:text-blue-400 font-medium">
+                                {{ __('pages.calendar_manager.legend_vacances_short') }}
+                            </span>
+                        @elseif ($day['examPeriodLabel'] ?? null)
+                            <span class="text-base text-red-600 dark:text-red-400 font-medium">
+                                {{ $day['examPeriodLabel'] }}
+                            </span>
                         @endif
                     </div>
                 </div>
@@ -86,22 +92,21 @@
 </x-filament::page>
 
 <style>
-    .today {  /* On utilise une nouvelle classe pour bypass le JIT de Tailwind */
-        background-color:rgba(59, 131, 246, 0.2);
+    .today {
+        background-color: rgba(59, 131, 246, 0.2) !important;
         border-color: #3b82f6;
         border-width: 2px;
     }
 
-    /* Mêmes classes "bypass JIT" pour les couleurs d'information du calendrier */
     .exam-period {
-        background-color: rgba(248, 113, 113, 0.2); /* red-400, faible opacité */
+        background-color: rgba(248, 113, 113, 0.2) !important;
     }
 
     .vacances-period {
-        background-color: rgba(96, 165, 250, 0.25); /* blue-400 */
+        background-color: rgba(96, 165, 250, 0.25) !important;
     }
 
     .day-modified {
-        background-color: rgba(74, 222, 128, 0.25); /* green-400 */
+        background-color: rgba(74, 222, 128, 0.25) !important;
     }
 </style>

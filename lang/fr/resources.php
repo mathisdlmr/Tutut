@@ -81,7 +81,7 @@ return [
         'modal_heading' => 'Liste des inscrit.e.s',
         'show_past_weeks' => 'Afficher les semaines passées',
         'hide_past_weeks' => 'Masquer les semaines passées',
-        'registration_delay_info' => 'Inscriptions : ouverture chaque :day à :time — Désinscription : :cancellation',
+        'registration_delay_info' => 'Inscriptions ouvertes chaque :day à :time - Désinscription : :cancellation',
         'cancellation_day_before' => "possible jusqu'à la veille du créneau",
         'cancellation_time_before' => 'possible jusqu\'à :time avant le créneau',
         'cancellation_none' => 'possible jusqu\'au début du créneau',

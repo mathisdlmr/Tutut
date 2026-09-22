@@ -29,6 +29,7 @@ use Illuminate\Support\Facades\Auth;
 class CalendarManager extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationLabel(): string
     {
@@ -45,7 +46,6 @@ class CalendarManager extends Page
         return __('pages.calendar_manager.title');
     }
 
-    protected static ?int $navigationSort = 5;
 
     protected static string $view = 'filament.pages.calendar-manager';
 
@@ -398,14 +398,16 @@ class CalendarManager extends Page
         if ($activeSemestre) {
             if ($activeSemestre->debut_medians && $activeSemestre->fin_medians) {
                 $examPeriods[] = [
-                    Carbon::parse($activeSemestre->debut_medians)->startOfDay(),
-                    Carbon::parse($activeSemestre->fin_medians)->endOfDay(),
+                    'start' => Carbon::parse($activeSemestre->debut_medians)->startOfDay(),
+                    'end' => Carbon::parse($activeSemestre->fin_medians)->endOfDay(),
+                    'label' => __('pages.calendar_manager.legend_medians_short'),
                 ];
             }
             if ($activeSemestre->debut_finaux && $activeSemestre->fin_finaux) {
                 $examPeriods[] = [
-                    Carbon::parse($activeSemestre->debut_finaux)->startOfDay(),
-                    Carbon::parse($activeSemestre->fin_finaux)->endOfDay(),
+                    'start' => Carbon::parse($activeSemestre->debut_finaux)->startOfDay(),
+                    'end' => Carbon::parse($activeSemestre->fin_finaux)->endOfDay(),
+                    'label' => __('pages.calendar_manager.legend_finaux_short'),
                 ];
             }
         }
@@ -442,9 +444,13 @@ class CalendarManager extends Page
                 fn ($week) => $currentDay->between($week->date_debut->copy()->startOfDay(), $week->date_fin->copy()->endOfDay())
             );
 
-            $isExamPeriod = !$isVacances && collect($examPeriods)->contains(
-                fn ($period) => $currentDay->between($period[0], $period[1])
-            );
+            $examPeriodLabel = null;
+            if (!$isVacances) {
+                $matchingPeriod = collect($examPeriods)->first(
+                    fn ($period) => $currentDay->between($period['start'], $period['end'])
+                );
+                $examPeriodLabel = $matchingPeriod['label'] ?? null;
+            }
 
             $dayData = [
                 'date' => $date,
@@ -454,7 +460,7 @@ class CalendarManager extends Page
                 'isSelected' => $isSelected,
                 'inActiveSemestre' => $inActiveSemestre,
                 'isVacances' => $isVacances,
-                'isExamPeriod' => $isExamPeriod,
+                'examPeriodLabel' => $examPeriodLabel,
                 'override' => isset($this->overrides[$date]) ? $this->overrides[$date] : null,
             ];
 
