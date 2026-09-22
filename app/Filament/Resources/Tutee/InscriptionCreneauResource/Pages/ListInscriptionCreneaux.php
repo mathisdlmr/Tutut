@@ -128,7 +128,7 @@ class ListInscriptionCreneaux extends ListRecords
                 ? Semaine::where('fk_semestre', $semestreId)
                     ->where('numero','<>','X')
                     ->where('date_fin', '>=', Carbon::now())
-                    ->sortByAsc('date_fin')
+                    ->orderBy('date_fin')
                     ->get()
                 : collect();
 

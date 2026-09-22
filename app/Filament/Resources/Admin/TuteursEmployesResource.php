@@ -156,7 +156,7 @@ class TuteursEmployesResource extends Resource
                     ->color('success')
                     ->action(
                         fn (Collection $records) => $records->each(
-                            fn (User $record) => 
+                            function (User $record) {
                                 if ($record->role === Roles::Tutee->value) {
                                     $record->update(['role' => Roles::Tutor->value]);
                                 } else if ($record->role === Roles::Tutor->value) {
@@ -170,6 +170,7 @@ class TuteursEmployesResource extends Resource
                                         ->danger()
                                         ->send();
                                 }
+                            }
                         )
                     ),
                 Tables\Actions\BulkAction::make('demote')
@@ -178,7 +179,7 @@ class TuteursEmployesResource extends Resource
                     ->color('warning')
                     ->action(
                         fn (Collection $records) => $records->each(
-                            fn (User $record) => 
+                            function (User $record) {
                                 if ($record->role === Roles::EmployedPrivilegedTutor->value) {
                                     $record->update(['role' => Roles::EmployedTutor->value]);
                                 } else if ($record->role === Roles::EmployedTutor->value) {
@@ -192,6 +193,7 @@ class TuteursEmployesResource extends Resource
                                         ->danger()
                                         ->send();
                                 }
+                            }
                         )
                     ),
 
