@@ -79,6 +79,12 @@ return [
         'semaine_actuelle' => 'Current week',
         'semaine_prochaine' => 'Next Week',
         'modal_heading' => 'List of registrants',
+        'show_past_weeks' => 'Show past weeks',
+        'hide_past_weeks' => 'Hide past weeks',
+        'registration_delay_info' => 'Registration: opens every :day at :time — Cancellation: :cancellation',
+        'cancellation_day_before' => 'possible until the day before the slot',
+        'cancellation_time_before' => 'possible up to :time before the slot',
+        'cancellation_none' => 'possible until the slot starts',
     ],
     'login' => [
         'title' => 'Login',

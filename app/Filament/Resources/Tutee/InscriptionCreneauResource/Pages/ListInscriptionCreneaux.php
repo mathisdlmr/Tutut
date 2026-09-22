@@ -34,13 +34,27 @@ class ListInscriptionCreneaux extends ListRecords
     protected static string $resource = InscriptionCreneauResource::class;
 
     /**
-     * Définit les actions d'en-tête (vides pour cette ressource)
+     * Indique si les semaines déjà passées doivent être incluses dans les onglets (Administrateur)
+     */
+    public bool $showPastWeeks = false;
+
+    /**
+     * Définit les actions d'en-tête
      *
      * @return array Tableau d'actions
      */
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('toggle_past_weeks')
+                ->label(fn () => $this->showPastWeeks
+                    ? __('resources.inscription_creneau.hide_past_weeks')
+                    : __('resources.inscription_creneau.show_past_weeks'))
+                ->icon(fn () => $this->showPastWeeks ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
+                ->color('gray')
+                ->button()
+                ->visible(fn () => Auth::user()->role === Roles::Administrator->value)
+                ->action(fn () => $this->showPastWeeks = !$this->showPastWeeks),
             Action::make('export_excel')
                 ->label(__('resources.common.buttons.export_excel'))
                 ->icon('heroicon-o-document-arrow-down')
@@ -127,7 +141,7 @@ class ListInscriptionCreneaux extends ListRecords
             $weeks = $semestreId
                 ? Semaine::where('fk_semestre', $semestreId)
                     ->where('numero','<>','X')
-                    ->where('date_fin', '>=', Carbon::now())
+                    ->when(!$this->showPastWeeks, fn (Builder $query) => $query->where('date_fin', '>=', Carbon::now()))
                     ->orderBy('date_fin')
                     ->get()
                 : collect();
