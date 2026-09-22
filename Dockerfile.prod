@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
         intl pdo pdo_mysql mysqli pdo_sqlite pdo_pgsql pgsql \
-        xml zip gd opcache \
+        xml zip gd \
     && pecl install redis \
     && docker-php-ext-enable redis \
     && apt-get clean \
