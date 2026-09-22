@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\MultiSelectFilter;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -149,6 +150,51 @@ class TuteursEmployesResource extends Resource
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make()
                     ->label(__('resources.tuteurs_employes.actions.delete')),
+                Tables\Actions\BulkAction::make('promote')
+                    ->label(__('resources.tuteurs_employes.actions.upgrade'))
+                    ->icon('heroicon-o-user-plus')
+                    ->color('success')
+                    ->action(
+                        fn (Collection $records) => $records->each(
+                            fn (User $record) => 
+                                if ($record->role === Roles::Tutee->value) {
+                                    $record->update(['role' => Roles::Tutor->value]);
+                                } else if ($record->role === Roles::Tutor->value) {
+                                    $record->update(['role' => Roles::EmployedTutor->value]);
+                                } else if ($record->role === Roles::EmployedTutor->value) {
+                                    $record->update(['role' => Roles::EmployedPrivilegedTutor->value]);
+                                } else {
+                                    Notification::make()
+                                        ->title('Erreur')
+                                        ->body('Impossible de promoter '.$record->firstName.' '.$record->lastName)
+                                        ->danger()
+                                        ->send();
+                                }
+                        )
+                    ),
+                Tables\Actions\BulkAction::make('demote')
+                    ->label(__('resources.tuteurs_employes.actions.downgrade'))
+                    ->icon('heroicon-o-user-minus')
+                    ->color('warning')
+                    ->action(
+                        fn (Collection $records) => $records->each(
+                            fn (User $record) => 
+                                if ($record->role === Roles::EmployedPrivilegedTutor->value) {
+                                    $record->update(['role' => Roles::EmployedTutor->value]);
+                                } else if ($record->role === Roles::EmployedTutor->value) {
+                                    $record->update(['role' => Roles::Tutor->value]);
+                                } else if ($record->role === Roles::Tutor->value) {
+                                    $record->update(['role' => Roles::Tutee->value]);
+                                } else {
+                                    Notification::make()
+                                        ->title('Erreur')
+                                        ->body('Impossible de demoter '.$record->firstName.' '.$record->lastName)
+                                        ->danger()
+                                        ->send();
+                                }
+                        )
+                    ),
+
             ]);
     }
 
