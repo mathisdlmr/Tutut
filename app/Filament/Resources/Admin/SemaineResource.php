@@ -188,15 +188,21 @@ class SemaineResource extends Resource
                             $date_debut = \Carbon\Carbon::parse($semestre->debut);
                         }
 
-                        $date_fin = $date_debut->copy()->addDays(6);
-
-                        if ($date_fin->gt($semestre->fin)) {
+                        if ($date_debut->gt($semestre->fin)) {
                             Notification::make()
                                 ->title('Erreur de création de semaine')
                                 ->body('La semaine n\'a pas pu être créée car elle dépasse la fin du semestre.')
                                 ->danger()
                                 ->send();
                             return false;
+                        }
+
+                        $date_fin = $date_debut->copy()->addDays(6);
+                        $wasCropped = false;
+
+                        if ($date_fin->gt($semestre->fin)) {
+                            $date_fin = Carbon::parse($semestre->fin);
+                            $wasCropped = true;
                         }
 
                         Semaine::create([
@@ -206,6 +212,14 @@ class SemaineResource extends Resource
                             'date_fin' => $date_fin,
                             'is_vacances' => false,
                         ]);
+
+                        if ($wasCropped) {
+                            Notification::make()
+                                ->title('Semaine créée (tronquée)')
+                                ->body('La semaine a été créée mais raccourcie car elle dépassait la fin du semestre.')
+                                ->warning()
+                                ->send();
+                        }
                     })
                     ->color('primary')
                     ->icon('heroicon-o-plus'),
