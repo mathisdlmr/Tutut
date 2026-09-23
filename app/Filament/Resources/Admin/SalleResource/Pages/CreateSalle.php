@@ -50,6 +50,21 @@ class CreateSalle extends CreateRecord
     }
 
     /**
+     * Formate une heure "HH:mm:ss" au format utilisé par les libellés de créneaux
+     * (ex: "14:00:00" -> "14h", "12:30:00" -> "12h30")
+     * 
+     * @param string $time L'heure au format "HH:mm:ss"
+     * @return string L'heure formatée (ex: "14h" ou "12h30")
+     */
+    private function formatHeure(string $time): string
+    {
+        $carbon = \Carbon\Carbon::createFromFormat('H:i:s', $time);
+        $minutes = $carbon->format('i');
+
+        return $carbon->format('H') . 'h' . ($minutes === '00' ? '' : $minutes);
+    }
+
+    /**
      * Prépare les données du formulaire avant qu'il ne soit rempli
      *
      * Cette méthode transforme les disponibilités enregistrées en base de données
@@ -65,8 +80,7 @@ class CreateSalle extends CreateRecord
         $dispos = [];
 
         foreach ($this->record->disponibilites as $dispo) {
-            $formatHeure = fn ($time) => \Carbon\Carbon::createFromFormat('H:i:s', $time)->format('H\hi');
-            $creneauLabel = $formatHeure($dispo->debut) . '-' . $formatHeure($dispo->fin);
+            $creneauLabel = $this->formatHeure($dispo->debut) . '-' . $this->formatHeure($dispo->fin);
             $dispos[$dispo->jour][$creneauLabel] = true;
         }
 
