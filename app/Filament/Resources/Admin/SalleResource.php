@@ -100,7 +100,7 @@ class SalleResource extends Resource
                     ->placeholder('A412')
                     ->unique(ignoreRecord: true),
 
-                    Grid::make(2)
+                    Grid::make(3)
                     ->schema(
                         collect($creneauxParJour)->map(function ($creneaux, $jour) {
                             if (in_array($jour, [__('resources.admin.salle.jours.medians'), __('resources.admin.salle.jours.finaux')])) {
@@ -108,13 +108,11 @@ class SalleResource extends Resource
                                     ->schema([
                                         TimePicker::make("dispos.$jour.debut")
                                             ->label(__('resources.admin.salle.fields.heure_debut'))
-                                            ->seconds(false)
-                                            ->required(),
+                                            ->seconds(false),
 
                                         TimePicker::make("dispos.$jour.fin")
                                             ->label(__('resources.admin.salle.fields.heure_fin'))
-                                            ->seconds(false)
-                                            ->required(),
+                                            ->seconds(false),
                                     ]);
                             }
 
@@ -124,7 +122,8 @@ class SalleResource extends Resource
                                         return Checkbox::make("dispos.$jour.$creneau")
                                             ->label($creneau);
                                     })->toArray()
-                                );
+                                )
+                                ->columnSpan(1);
                         })->values()->toArray()
                     )
             ]);
