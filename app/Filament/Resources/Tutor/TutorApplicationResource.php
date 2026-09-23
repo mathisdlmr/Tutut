@@ -194,6 +194,21 @@ class TutorApplicationResource extends Resource
                                 ->icon('heroicon-o-check-circle')
                                 ->action(function (BecomeTutor $record) {
                                     $user = $record->user;
+
+                                    if (in_array($user->role, [
+                                        Roles::Tutor->value,
+                                        Roles::EmployedTutor->value,
+                                        Roles::EmployedPrivilegedTutor->value,
+                                    ])) {
+                                        Notification::make()
+                                            ->title(__('resources.tutor_application.actions.accept.already_tutor_title'))
+                                            ->body(__('resources.tutor_application.actions.accept.already_tutor_body'))
+                                            ->danger()
+                                            ->send();
+
+                                        return redirect(request()->header('Referer'));
+                                    }
+
                                     $user->role = Roles::Tutor;
                                     $user->save();
                                     $record->delete();

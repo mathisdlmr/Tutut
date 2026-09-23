@@ -327,6 +327,8 @@ return [
                 'modal_heading' => 'Confirm Acceptance',
                 'modal_description' => 'Are you sure you want to accept this application?',
                 'notification_title' => 'Application accepted',
+                'already_tutor_title' => 'Unable to accept the application',
+                'already_tutor_body' => 'This user is already a tutor, employed tutor or employed privileged tutor. Their role was not changed.',
             ],
             'reject' => [
                 'label' => 'Reject',

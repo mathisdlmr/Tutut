@@ -327,6 +327,8 @@ return [
                 'modal_heading' => 'Confirmer l\'acceptation',
                 'modal_description' => 'Êtes-vous sûr de vouloir accepter cette candidature ?',
                 'notification_title' => 'Candidature acceptée',
+                'already_tutor_title' => 'Impossible d\'accepter la candidature',
+                'already_tutor_body' => 'Cet.te utilisateur.ice est déjà tuteur.ice, tuteur.ice employé.e ou tuteur.ice employé.e privilégié.e. Son rôle n\'a pas été modifié.',
             ],
             'reject' => [
                 'label' => 'Refuser',
