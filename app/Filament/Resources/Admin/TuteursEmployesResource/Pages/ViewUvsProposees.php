@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Admin\TuteursEmployesResource\Pages;
 use App\Enums\Roles;
 use App\Filament\Resources\Admin\TuteursEmployesResource;
 use App\Models\User;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 
 class ViewUvsProposees extends Page
@@ -15,6 +16,22 @@ class ViewUvsProposees extends Page
     public function getTitle(): string
     {
         return 'UVs proposées par les tuteur.ice.s';
+    }
+
+    public function removeUv(int $userId, string $uvCode): void
+    {
+        $user = User::find($userId);
+
+        if (!$user) {
+            return;
+        }
+
+        $user->proposedUvs()->detach($uvCode);
+
+        Notification::make()
+            ->title("UV {$uvCode} retirée de {$user->firstName} {$user->lastName}")
+            ->success()
+            ->send();
     }
 
     public function getEmployedTutorsData()

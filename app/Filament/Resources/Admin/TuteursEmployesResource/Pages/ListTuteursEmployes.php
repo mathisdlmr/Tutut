@@ -30,7 +30,7 @@ class ListTuteursEmployes extends ListRecords
                 ->label('Voir les UVs proposées')
                 ->icon('heroicon-o-academic-cap')
                 ->color('info')
-                ->url('/admin/tuteurs-employes/uvs')
+                ->url(TuteursEmployesResource::getUrl('uvs'))
         ];
     }
 }

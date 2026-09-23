@@ -54,8 +54,17 @@
                                                 <div class="flex flex-wrap gap-1">
                                                     @if($tutor->proposedUvs)
                                                         @foreach($tutor->proposedUvs as $uv)
-                                                            <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20">
+                                                            <span class="inline-flex items-center gap-x-1 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20">
                                                                 {{ $uv->code }} - {{ $uv->intitule }}
+                                                                <button
+                                                                    type="button"
+                                                                    wire:click="removeUv({{ $tutor->id }}, '{{ $uv->code }}')"
+                                                                    wire:confirm="Retirer l'UV {{ $uv->code }} à {{ $tutor->firstName }} {{ $tutor->lastName }} ?"
+                                                                    class="text-gray-400 hover:text-danger-600 dark:hover:text-danger-400"
+                                                                    title="Retirer cette UV"
+                                                                >
+                                                                    &times;
+                                                                </button>
                                                             </span>
                                                         @endforeach
                                                     @endif
@@ -79,7 +88,7 @@
                                 </svg>
                             </div>
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Aucune UV proposée</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aucun tuteur employé ne propose d'UV actuellement.</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aucun tuteur employé ne propose d'UV actuellement</p>
                         </div>
                     @endif
                 </div>
@@ -120,8 +129,17 @@
                                             <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
                                                 <div class="flex flex-wrap gap-1">
                                                     @foreach($tutor->proposedUvs as $uv)
-                                                        <span class="inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20">
+                                                        <span class="inline-flex items-center gap-x-1 rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/20">
                                                             {{ $uv->code }} - {{ $uv->intitule }}
+                                                            <button
+                                                                type="button"
+                                                                wire:click="removeUv({{ $tutor->id }}, '{{ $uv->code }}')"
+                                                                wire:confirm="Retirer l'UV {{ $uv->code }} à {{ $tutor->firstName }} {{ $tutor->lastName }} ?"
+                                                                class="text-gray-400 hover:text-danger-600 dark:hover:text-danger-400"
+                                                                title="Retirer cette UV"
+                                                            >
+                                                                &times;
+                                                            </button>
                                                         </span>
                                                     @endforeach
                                                 </div>
@@ -144,7 +162,7 @@
                                 </svg>
                             </div>
                             <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Aucune UV proposée</h3>
-                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aucun tuteur.ice bénévole ne propose d'UV actuellement.</p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Aucun tuteur.ice bénévole ne propose d'UV actuellement</p>
                         </div>
                     @endif
                 </div>
