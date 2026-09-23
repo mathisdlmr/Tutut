@@ -197,7 +197,11 @@ class SemaineResource extends Resource
                             return false;
                         }
 
-                        $date_fin = $date_debut->copy()->addDays(6);
+                        // La semaine se termine toujours un dimanche
+                        $date_fin = $date_debut->copy();
+                        if ($date_fin->dayOfWeek !== Carbon::SUNDAY) {
+                            $date_fin->next(Carbon::SUNDAY);
+                        }
                         $wasCropped = false;
 
                         if ($date_fin->gt($semestre->fin)) {
