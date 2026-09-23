@@ -225,6 +225,7 @@ class SettingsPage extends Page implements Tables\Contracts\HasTable, Forms\Cont
             ->headerActions([
                 TableAction::make('reset_uvs')
                     ->label(__('resources.pages.settings.buttons.reset_uvs'))
+                    ->disabled() // On désactive ce bouton pour l'instant car l'API de UTCrawl ne fonctionne plus et on va juste truncate la DB
                     ->action(fn () => $this->resetUvs())
                     ->color('danger')
                     ->requiresConfirmation()
