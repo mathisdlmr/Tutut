@@ -94,7 +94,7 @@ class ListInscriptionCreneaux extends ListRecords
             $cancellationText = __('resources.inscription_creneau.cancellation_day_before');
         } elseif (!empty($cancellationSettings['minTimeCancellationTime'])) {
             $cancellationText = __('resources.inscription_creneau.cancellation_time_before', [
-                'time' => $cancellationSettings['minTimeCancellationTime'],
+                'time' => $this->formatHeure($cancellationSettings['minTimeCancellationTime']),
             ]);
         } else {
             $cancellationText = __('resources.inscription_creneau.cancellation_none');
@@ -105,6 +105,19 @@ class ListInscriptionCreneaux extends ListRecords
             'time' => $registrationTime,
             'cancellation' => $cancellationText,
         ]);
+    }
+
+    /**
+     * Formate une heure "HH:mm" au format "<HH>h" (ou "<HH>h<mm>" si les minutes sont définies)
+     *
+     * @param string $time L'heure au format "HH:mm"
+     * @return string L'heure formatée
+     */
+    private function formatHeure(string $time): string
+    {
+        [$hours, $minutes] = explode(':', $time);
+
+        return $minutes === '00' ? "{$hours}h" : "{$hours}h{$minutes}";
     }
 
     /**
