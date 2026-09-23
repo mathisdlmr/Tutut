@@ -34,11 +34,6 @@ class ListInscriptionCreneaux extends ListRecords
     protected static string $resource = InscriptionCreneauResource::class;
 
     /**
-     * Indique si les semaines déjà passées doivent être incluses dans les onglets (Administrateur)
-     */
-    public bool $showPastWeeks = false;
-
-    /**
      * Définit les actions d'en-tête
      *
      * @return array Tableau d'actions
@@ -46,15 +41,6 @@ class ListInscriptionCreneaux extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Action::make('toggle_past_weeks')
-                ->label(fn () => $this->showPastWeeks
-                    ? __('resources.inscription_creneau.hide_past_weeks')
-                    : __('resources.inscription_creneau.show_past_weeks'))
-                ->icon(fn () => $this->showPastWeeks ? 'heroicon-o-eye-slash' : 'heroicon-o-eye')
-                ->color('gray')
-                ->button()
-                ->visible(fn () => Auth::user()->role === Roles::Administrator->value)
-                ->action(fn () => $this->showPastWeeks = !$this->showPastWeeks),
             Action::make('export_excel')
                 ->label(__('resources.common.buttons.export_excel'))
                 ->icon('heroicon-o-document-arrow-down')
@@ -167,13 +153,13 @@ class ListInscriptionCreneaux extends ListRecords
      */
     public function getTabs(): array
     {
+        // Pour les Admin, on affiche toutes les semaines
         if (Auth::user()->role === Roles::Administrator->value) {
             $semestreId = Semestre::where('is_active', true)->first()?->code;
 
             $weeks = $semestreId
                 ? Semaine::where('fk_semestre', $semestreId)
                     ->where('numero','<>','X')
-                    ->when(!$this->showPastWeeks, fn (Builder $query) => $query->where('date_fin', '>=', Carbon::now()))
                     ->orderBy('date_fin')
                     ->get()
                 : collect();
@@ -200,6 +186,9 @@ class ListInscriptionCreneaux extends ListRecords
             return $tabs;
         }
 
+        // Pour le reste, on affiche la semaine actuelle
+        // Ainsi que la semaine prochain en fonction du retour de shouldShowCurrentAndNextWeek()
+        // Le retour de shouldShowCurrentAndNextWeek() est déterminé par les Settings d'inscription aux créneaux
         $showNextWeek = $this->shouldShowCurrentAndNextWeek();
 
         $currentWeek = Semaine::where('date_debut', '<=', Carbon::now())
@@ -208,6 +197,7 @@ class ListInscriptionCreneaux extends ListRecords
 
         $tabs = [];
 
+        // Si il y a une semaine actuelle, on la formate et affiche
         if ($currentWeek) {
             $tabs["semaine-{$currentWeek->id}"] = Tab::make(__('resources.inscription_creneau.semaine_actuelle')." ({$currentWeek->numero})")
                 ->badge(fn () => Creneaux::where('fk_semaine', $currentWeek->id)
@@ -226,11 +216,13 @@ class ListInscriptionCreneaux extends ListRecords
                         });
                 });
 
+            // Si on doit afficher la semaine pro, on la récupère
             if ($showNextWeek) {
                 $nextWeek = Semaine::where('numero', $currentWeek->numero + 1)
                     ->where('fk_semestre', $currentWeek->fk_semestre)
                     ->first();
 
+                // Puis on la formate et on l'affiche
                 if ($nextWeek) {
                     $tabs["semaine-{$nextWeek->id}"] = Tab::make(__('resources.inscription_creneau.semaine_prochaine')." ({$nextWeek->numero})")
                         ->badge(fn () => Creneaux::where('fk_semaine', $nextWeek->id)
