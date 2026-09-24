@@ -9,6 +9,7 @@ use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\HtmlString;
 
 /**
  * Widget de visualisation des créneaux pour un tuteur
@@ -115,6 +116,40 @@ class TutorCreneauxTableWidget extends BaseWidget
                     ->icon('heroicon-o-academic-cap')
                     ->color('primary'),
             ]),
+        ];
+    }
+
+    protected function getTableActions(): array
+    {
+        return [
+            Tables\Actions\Action::make('viewRegistrations')
+                ->label(__('resources.common.buttons.view_registrations'))
+                ->icon('heroicon-o-eye')
+                ->color('gray')
+                ->modalHeading(__('resources.inscription_creneau.modal_heading'))
+                ->modalButton(__('resources.common.buttons.close'))
+                ->modalCancelAction(false)
+                ->visible(fn (Creneaux $record) => $record->inscriptions->count() > 0)
+                ->modalContent(function (Creneaux $record) {
+                    $html = '<ul class="space-y-2">';
+
+                    foreach ($record->inscriptions as $inscription) {
+                        $user = $inscription->tutee;
+                        $uvs = collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
+                            ->sort()
+                            ->implode(', ');
+
+                        $html .= "<li>
+                                    <strong>• {$user->firstName} {$user->lastName}</strong> : {$uvs}<br>
+                                  </li>";
+                    }
+
+                    $html .= '</ul>';
+
+                    return new HtmlString($html);
+                })
+                ->button()
+                ->outlined(),
         ];
     }
 
