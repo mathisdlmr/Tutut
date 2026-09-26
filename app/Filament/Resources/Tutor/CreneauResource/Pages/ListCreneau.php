@@ -130,7 +130,7 @@ class ListCreneau extends ListRecords
             $tabs["semaine-{$currentWeek->id}"] = Tab::make(__('resources.inscription_creneau.semaine_actuelle')." ({$currentWeek->numero})")
                 ->badge(fn () => Creneaux::where('fk_semaine', $currentWeek->id)->count())
                 ->modifyQueryUsing(function (Builder $query) use ($currentWeek) {
-                    return $query->where('fk_semaine', $currentWeek->id)->where('start', '<=', Carbon::now());
+                    return $query->where('fk_semaine', $currentWeek->id)->where('start', '>=', Carbon::now());
                 });
 
             if ($showNextWeek) {
@@ -142,7 +142,7 @@ class ListCreneau extends ListRecords
                     $tabs["semaine-{$nextWeek->id}"] = Tab::make(__('resources.inscription_creneau.semaine_prochaine')." ({$nextWeek->numero})")
                         ->badge(fn () => Creneaux::where('fk_semaine', $nextWeek->id)->count())
                         ->modifyQueryUsing(function (Builder $query) use ($nextWeek) {
-                            return $query->where('fk_semaine', $nextWeek->id)->where('start', '<=', Carbon::now());
+                            return $query->where('fk_semaine', $nextWeek->id)->where('start', '>=', Carbon::now());
                         });
                 }
             }

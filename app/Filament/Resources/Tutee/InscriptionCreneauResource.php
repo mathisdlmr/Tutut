@@ -6,7 +6,6 @@ use App\Enums\Roles;
 use App\Filament\Resources\Tutee\InscriptionCreneauResource\Pages;
 use App\Models\Creneaux;
 use App\Models\Inscription;
-use App\Models\Semaine;
 use App\Models\Semestre;
 use Carbon\Carbon;
 use Filament\Forms;

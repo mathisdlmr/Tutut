@@ -181,7 +181,6 @@ class ListInscriptionCreneaux extends ListRecords
             foreach ($weeks as $week) {
                 $tabs["semaine-{$week->id}"] = Tab::make(__('resources.inscription_creneau.semaine')." {$week->numero}")
                     ->badge(fn () => Creneaux::where('fk_semaine', $week->id)
-                        ->where('end', '>', Carbon::now())
                         ->where(function ($query) {
                             $query->whereNotNull('tutor1_id')
                                 ->orWhereNotNull('tutor2_id');
@@ -189,7 +188,6 @@ class ListInscriptionCreneaux extends ListRecords
                         ->count())
                     ->modifyQueryUsing(function (Builder $query) use ($week) {
                         return $query->where('fk_semaine', $week->id)
-                            ->where('end', '>', Carbon::now())
                             ->where(function ($query) {
                                 $query->whereNotNull('tutor1_id')
                                     ->orWhereNotNull('tutor2_id');
