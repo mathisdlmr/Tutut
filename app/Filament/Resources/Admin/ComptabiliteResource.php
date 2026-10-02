@@ -289,7 +289,7 @@ class ComptabiliteResource extends Resource
                                 $compta = $comptabilites->get($semaine->id);
 
                                 $heuresSupplementaires = HeuresSupplementaires::where('fk_user', $user->id)
-                                    ->where('fk_semaine', $semaine->numero)
+                                    ->where('fk_semaine', $semaine->id)
                                     ->get();
 
                                 if ($compta && $compta->nb_heures > 0) {
@@ -372,7 +372,7 @@ class ComptabiliteResource extends Resource
 
                             if ($totalHeures > 0) {
                                 $heuresSupplementaires = HeuresSupplementaires::where('fk_user', $record->id)
-                                    ->where('fk_semaine', $semaine->numero)
+                                    ->where('fk_semaine', $semaine->id)
                                     ->get();
 
                                 $heuresSupplementairesItems = [];
@@ -444,13 +444,13 @@ class ComptabiliteResource extends Resource
                                 }
 
                                 $oldHeuresSupp = HeuresSupplementaires::where('fk_user', $record->id)
-                                    ->where('fk_semaine', $semaine->numero)
+                                    ->where('fk_semaine', $semaine->id)
                                     ->get();
 
                                 $oldTotalHeures = $oldHeuresSupp->sum('nb_heures');
 
                                 HeuresSupplementaires::where('fk_user', $record->id)
-                                    ->where('fk_semaine', $semaine->numero)
+                                    ->where('fk_semaine', $semaine->id)
                                     ->delete();
 
                                 $newTotalHeures = 0;
@@ -460,7 +460,7 @@ class ComptabiliteResource extends Resource
                                         if (isset($heureSupp['nb_heures']) && isset($heureSupp['commentaire']) && floatval($heureSupp['nb_heures']) > 0) {
                                             HeuresSupplementaires::create([
                                                 'fk_user' => $record->id,
-                                                'fk_semaine' => $semaine->numero,
+                                                'fk_semaine' => $semaine->id,
                                                 'nb_heures' => floatval($heureSupp['nb_heures']),
                                                 'commentaire' => $heureSupp['commentaire'],
                                             ]);

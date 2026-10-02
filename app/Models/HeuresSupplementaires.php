@@ -20,6 +20,6 @@ class HeuresSupplementaires extends Model
 
     public function semaine()
     {
-        return $this->belongsTo(Semaine::class, 'fk_semaine', 'numero');
+        return $this->belongsTo(Semaine::class, 'fk_semaine');
     }
 }

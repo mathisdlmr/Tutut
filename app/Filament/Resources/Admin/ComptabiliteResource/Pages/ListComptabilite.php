@@ -50,11 +50,11 @@ class ListComptabilite extends ListRecords
 
                     // Récupère tous les tuteurs employés ayant des heures
                     $employedTutorIds = DB::table('comptabilite')
-                        ->whereIn('fk_semaine', $semaines->pluck('numero'))
+                        ->whereIn('fk_semaine', $semaines->pluck('id'))
                         ->pluck('fk_user')
                         ->merge(
                             DB::table('heures_supplementaires')
-                                ->whereIn('fk_semaine', $semaines->pluck('numero'))
+                                ->whereIn('fk_semaine', $semaines->pluck('id'))
                                 ->pluck('fk_user')
                         )
                         ->unique();
@@ -93,7 +93,7 @@ class ListComptabilite extends ListRecords
                         // Récupération des heures pour chaque semaine
                         foreach ($semaines as $semaine) {
                             $comptabilite = Comptabilite::where('fk_user', $tutor->id)
-                                ->where('fk_semaine', $semaine->numero)
+                                ->where('fk_semaine', $semaine->id)
                                 ->first();
 
                             $heuresSemaine = ($comptabilite ? $comptabilite->nb_heures : 0);
