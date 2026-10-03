@@ -1,7 +1,7 @@
 ##############################################
 # Stage 1 : Vite assets build
 ##############################################
-FROM node:20-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -57,8 +57,7 @@ RUN rm -f /etc/nginx/sites-enabled/default
 # Setting up the user
 RUN addgroup --gid 1000 www \
     && adduser --uid 1000 --ingroup www --shell /bin/bash --disabled-password --gecos "" www \
-    && usermod -aG root www \
-    && chgrp -R 0 /var/www/html /var/lib/nginx /var/log/nginx /run \
+    && chown -R 1000:0 /var/www/html /var/lib/nginx /var/log/nginx /run \
     && chmod -R g=u /var/www/html /var/lib/nginx /var/log/nginx /run
 USER 1000
 
