@@ -71,8 +71,6 @@ class FeedbackResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Hidden::make('tutee_id')
-                    ->default(Auth::id()),
                 Forms\Components\Textarea::make('text')
                     ->required()
                     ->label(__('resources.feedback.fields.text')),

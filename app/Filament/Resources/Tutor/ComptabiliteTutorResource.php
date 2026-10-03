@@ -106,6 +106,18 @@ class ComptabiliteTutorResource extends Resource
         $creneau->save();
     }
 
+    public static function semainesNonSaisies(int $userId, string $semestreCode)
+    {
+        // Semaines du semestre pas encore validées (saisies) par l'administration pour ce tuteur
+        return \App\Models\Semaine::where('fk_semestre', $semestreCode)
+            ->whereNotIn('id', function ($query) use ($userId) {
+                $query->select('fk_semaine')
+                    ->from('comptabilite')
+                    ->where('fk_user', $userId)
+                    ->where('saisie', true);
+            });
+    }
+
     /**
      * Configure le formulaire de comptabilité des heures
      *
@@ -140,14 +152,7 @@ class ComptabiliteTutorResource extends Resource
 
                     $filterUncounted = $get('filter_uncounted') ?? false;
 
-                    $semainesQuery = \App\Models\Semaine::where('fk_semestre', $semestreActif->code);
-                    $semainesQuery->whereNotIn('id', function ($query) use ($user) {  // N'afficher que les semaines pas encore saisies
-                        $query->select('fk_semaine')
-                            ->from('comptabilite')
-                            ->where('fk_user', $user->id)
-                            ->where('saisie', true);
-                    });
-                    $semaines = $semainesQuery->orderByDesc('numero')->get();
+                    $semaines = self::semainesNonSaisies($user->id, $semestreActif->code)->orderByDesc('numero')->get();
 
                     $allCreneaux = \App\Models\Creneaux::with(['salle', 'inscriptions', 'semaine'])
                         ->where(function ($q) use ($user) {

@@ -12,11 +12,12 @@ Route::get('/healthz', function () {
 
 /**************************************************** Authentification ****************************************************/
 Route::get('/login', [AuthController::class, 'login'])->name('login');
-Route::get('/callback', [AuthController::class, 'callback'])->name('callback');
-Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/callback', [AuthController::class, 'callback'])->name('callback')->middleware('throttle:60,1'); # Petit rate-limit : 60 req/IP/minutes
 /**************************************************************************************************************************/
 
 /**************************************************** RGPD ****************************************************/
-Route::get('/rgpd-notice', [RgpdController::class, 'show'])->name('rgpd.notice');
-Route::post('/rgpd-notice', [RgpdController::class, 'accept'])->name('rgpd.accept');
+Route::middleware('auth')->group(function () {
+    Route::get('/rgpd-notice', [RgpdController::class, 'show'])->name('rgpd.notice');
+    Route::post('/rgpd-notice', [RgpdController::class, 'accept'])->name('rgpd.accept');
+});
 /**************************************************************************************************************************/

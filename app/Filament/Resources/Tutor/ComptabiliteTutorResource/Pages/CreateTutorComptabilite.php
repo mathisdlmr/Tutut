@@ -3,11 +3,14 @@
 namespace App\Filament\Resources\Tutor\ComptabiliteTutorResource\Pages;
 
 use App\Filament\Resources\Tutor\ComptabiliteTutorResource;
+use App\Models\Comptabilite;
 use App\Models\Creneaux;
+use App\Models\HeuresSupplementaires;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Page de création/modification de la comptabilité pour les tuteurs
@@ -116,6 +119,12 @@ class CreateTutorComptabilite extends CreateRecord
             abort(403, 'Non autorisé');
         }
 
+        $semaineSaisie = Comptabilite::where('fk_user', $user->id)
+            ->where('fk_semaine', $creneau->fk_semaine)
+            ->where('saisie', true)
+            ->exists();
+        abort_if($semaineSaisie, 403, 'Semaine déjà validée');
+
         $creneau->save();
     }
 
@@ -146,41 +155,52 @@ class CreateTutorComptabilite extends CreateRecord
         $creneauxParSemaine = $creneaux->groupBy('fk_semaine');
         $formState = $this->form->getState();
         $semestreActif = \App\Models\Semestre::where('is_active', true)->first();
-        $semaines = \App\Models\Semaine::where('fk_semestre', $semestreActif->code)->get();
+        // Les semaines validées par l'administration ne doivent plus être touchées par le tuteur
+        $semaines = ComptabiliteTutorResource::semainesNonSaisies($user->id, $semestreActif->code)->get();
 
-        foreach ($semaines as $semaine) {
-            $heuresSupp = collect($formState["heures_supplementaires_{$semaine->id}"] ?? []);
-            $creneaux = $creneauxParSemaine[$semaine->id] ?? collect();
+        DB::transaction(function () use ($semaines, $formState, $creneauxParSemaine, $user) {
+            foreach ($semaines as $semaine) {
+                $key = "heures_supplementaires_{$semaine->id}";
+                $formHasHeuresSupp = array_key_exists($key, $formState);
+                $heuresSupp = $formHasHeuresSupp
+                    ? collect($formState[$key])
+                    : HeuresSupplementaires::where('fk_user', $user->id)->where('fk_semaine', $semaine->id)->get();
+                $creneaux = $creneauxParSemaine[$semaine->id] ?? collect();
 
-            $totalMinutes = $creneaux->sum(fn ($creneau) => $creneau->start->diffInMinutes($creneau->end));
-            $heuresSuppTotal = $heuresSupp->sum('nb_heures') ?? 0;
-            $nb_heures = ($totalMinutes / 60) + $heuresSuppTotal;
+                $totalMinutes = $creneaux->sum(fn ($creneau) => $creneau->start->diffInMinutes($creneau->end));
+                $heuresSuppTotal = $heuresSupp->sum('nb_heures') ?? 0;
+                $nb_heures = ($totalMinutes / 60) + $heuresSuppTotal;
 
-            if ($nb_heures > 0) {
-                \App\Models\Comptabilite::updateOrCreate(
-                    [
+                if ($nb_heures > 0) {
+                    Comptabilite::updateOrCreate(
+                        [
+                            'fk_user' => $user->id,
+                            'fk_semaine' => $semaine->id,
+                        ],
+                        [
+                            'nb_heures' => $nb_heures,
+                        ]
+                    );
+                }
+
+                if (!$formHasHeuresSupp) {
+                    continue;
+                }
+
+                HeuresSupplementaires::where('fk_user', $user->id)
+                    ->where('fk_semaine', $semaine->id)
+                    ->delete();
+
+                foreach ($heuresSupp as $heureSupp) {
+                    HeuresSupplementaires::create([
                         'fk_user' => $user->id,
                         'fk_semaine' => $semaine->id,
-                    ],
-                    [
-                        'nb_heures' => $nb_heures,
-                    ]
-                );
+                        'nb_heures' => $heureSupp['nb_heures'],
+                        'commentaire' => $heureSupp['commentaire'],
+                    ]);
+                }
             }
-
-            \App\Models\HeuresSupplementaires::where('fk_user', $user->id)
-                ->where('fk_semaine', $semaine->id)
-                ->delete();
-
-            foreach ($heuresSupp as $heureSupp) {
-                \App\Models\HeuresSupplementaires::create([
-                    'fk_user' => $user->id,
-                    'fk_semaine' => $semaine->id,
-                    'nb_heures' => $heureSupp['nb_heures'],
-                    'commentaire' => $heureSupp['commentaire'],
-                ]);
-            }
-        }
+        });
 
         Notification::make()
             ->title(__('resources.comptabilite_tutor.notifications.hours_updated'))

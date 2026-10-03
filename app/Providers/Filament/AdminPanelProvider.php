@@ -28,6 +28,7 @@ use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Http\Responses\Auth\Contracts\LogoutResponse;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -42,6 +43,19 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    public function register(): void
+    {
+        parent::register();
+
+        // Après la déconnexion à Filament, on déconnecte aussi le CAS
+        $this->app->bind(LogoutResponse::class, fn () => new class () implements LogoutResponse {
+            public function toResponse($request)
+            {
+                return redirect(config('auth.oidc.logout_url'));
+            }
+        });
+    }
+
     public function panel(Panel $panel): Panel
     {
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {

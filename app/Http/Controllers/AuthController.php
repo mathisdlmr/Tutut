@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use League\OAuth2\Client\Provider\GenericProvider;
 
 class AuthController extends Controller
@@ -64,7 +65,7 @@ class AuthController extends Controller
     {
         $storedState = $request->session()->pull('oidc_state');
         if (!$request->has('state') || $request->get('state') !== $storedState) {
-            abort(400, 'Invalid state: ' . $request->get('state') . ' VS ' . $storedState);
+            abort(400, 'Invalid state');
         }
 
         if (!$request->has('code')) {
@@ -112,13 +113,8 @@ class AuthController extends Controller
 
             return redirect(RouteServiceProvider::HOME);
         } catch (\Exception $e) {
-            abort(400, 'Callback error : ' . $e->getMessage());
+            Log::warning('OIDC callback error', ['exception' => $e]);
+            abort(400, 'Callback error');
         }
-    }
-
-    public function logout()
-    {
-        Auth::logout();
-        return redirect(config('auth.oidc.logout_url'));
     }
 }

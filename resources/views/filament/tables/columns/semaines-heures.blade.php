@@ -24,7 +24,7 @@
             if (!empty($heures_supp)) {
                 $content .= "<ul class='text-gray-600 text-sm italic'>";
                 foreach ($heures_supp as $hs) {
-                    $content .= "<li>- {$hs->nb_heures}h :  {$hs->commentaire}</li>";
+                    $content .= "<li>- " . e($hs->nb_heures) . "h :  " . e($hs->commentaire) . "</li>";
                 }
                 $content .= "</ul>";
             }

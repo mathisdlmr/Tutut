@@ -110,6 +110,10 @@ class ListComptabilite extends ListRecords
                     $csvContent = '';
                     foreach ($csvData as $row) {
                         $escapedRow = array_map(function ($value) {
+                            // On échappe les valeurs qui formattent des cellules dans excel (=, @, etc.) pour que tout reste affiché tel quel
+                            if (is_string($value) && preg_match('/^[=+\-@\t\r]/', $value)) {
+                                $value = "'" . $value;
+                            }
                             return '"' . str_replace('"', '""', $value) . '"';
                         }, $row);
 

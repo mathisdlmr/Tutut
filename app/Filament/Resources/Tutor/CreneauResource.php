@@ -352,7 +352,7 @@ class CreneauResource extends Resource
                             $lines = self::balanceHorizontally($items, 30); // 30 caractères max/ligne
 
                             return collect($lines)->map(function ($lineItems) {
-                                return implode('&nbsp;&nbsp;', $lineItems);
+                                return implode('&nbsp;&nbsp;', array_map('e', $lineItems));
                             })->implode('<br>');
                         })
                         ->icon('heroicon-o-academic-cap')

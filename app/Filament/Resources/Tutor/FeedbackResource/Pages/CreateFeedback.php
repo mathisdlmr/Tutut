@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Tutor\FeedbackResource\Pages;
 
 use App\Filament\Resources\Tutor\FeedbackResource;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Page de création d'un feedback
@@ -25,6 +26,15 @@ class CreateFeedback extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
+    }
+
+    /**
+     * Force l'auteur du feedback côté serveur (jamais pris depuis le client)
+     */
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['tutee_id'] = Auth::id();
+        return $data;
     }
 
     /**

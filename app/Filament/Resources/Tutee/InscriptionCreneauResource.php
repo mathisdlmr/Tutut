@@ -19,6 +19,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 
@@ -189,16 +190,37 @@ class InscriptionCreneauResource extends Resource
     }
 
     /**
-     * Vérifie si l'utilisateur peut annuler son inscription à un créneau
-     *
-     * Applique diverses règles pour déterminer si l'annulation est possible :
-     * - Interdiction d'annuler un créneau déjà commencé
-     * - Option pour interdire l'annulation le jour même du créneau
-     * - Règle de délai minimum avant le début du créneau
-     *
-     * @param Creneaux $creneau Le créneau dont on veut vérifier la possibilité d'annulation
-     * @return bool Vrai si l'annulation est possible
+     * Règles d'inscription d'un utilisateur à un créneau (places, doublons, date, délai)
      */
+    protected static function canSubscribe(Creneaux $record, $userId): bool
+    {
+        $settings = self::getSettings();
+        $max = ($record->tutor1_id && $record->tutor2_id)
+            ? (isset($settings['maxStudentFor2Tutors']) ? intval($settings['maxStudentFor2Tutors']) : 15)
+            : (isset($settings['maxStudentFor1Tutor']) ? intval($settings['maxStudentFor1Tutor']) : 6);
+        $alreadySubscribed = Inscription::where('tutee_id', $userId)
+            ->whereHas('creneau', function ($query) use ($record) {
+                $query->where('start', $record->start);
+            })->exists();
+        return !$record->inscriptions->contains('tutee_id', $userId)
+            && $record->inscriptions_count < $max
+            && Auth::user()->role !== Roles::Administrator->value
+            && $userId !== $record->tutor1_id
+            && $userId !== $record->tutor2_id
+            && $record->end > Carbon::now()
+            && !$alreadySubscribed
+            && self::canChange($record);
+    }
+
+    /**
+     * La liste des inscrits n'est visible que par l'administration et les tuteurs du créneau
+     */
+    protected static function canViewRegistrations(Creneaux $record): bool
+    {
+        return Auth::user()->role === Roles::Administrator->value
+            || in_array(Auth::id(), [$record->tutor1_id, $record->tutor2_id], true);
+    }
+
     protected static function canChange(Creneaux $creneau): bool
     {
         $settings = self::getSettings();
@@ -369,7 +391,7 @@ class InscriptionCreneauResource extends Resource
                             $lines = self::balanceHorizontally($items, 35); // 35 caractères max/ligne
 
                             return collect($lines)->map(function ($lineItems) {
-                                return implode('&nbsp;&nbsp;', $lineItems);
+                                return implode('&nbsp;&nbsp;', array_map('e', $lineItems));
                             })->implode('<br>');
                         })
                         ->icon('heroicon-o-academic-cap')
@@ -401,30 +423,21 @@ class InscriptionCreneauResource extends Resource
                             ->placeholder('Choisissez vos UVs')
                             ->maxItems(3),
                     ])
-                    ->visible(function (Creneaux $record) use ($userId) {
-                        $settings = self::getSettings();
-                        $max = ($record->tutor1_id && $record->tutor2_id)
-                            ? (isset($settings['maxStudentFor2Tutors']) ? intval($settings['maxStudentFor2Tutors']) : 15)
-                            : (isset($settings['maxStudentFor1Tutor']) ? intval($settings['maxStudentFor1Tutor']) : 6);
-                        $alreadySubscribed = Inscription::where('tutee_id', $userId)
-                            ->whereHas('creneau', function ($query) use ($record) {
-                                $query->where('start', $record->start);
-                            })->exists();
-                        return !$record->inscriptions->contains('tutee_id', $userId)
-                            && $record->inscriptions_count < $max
-                            && Auth::user()->role !== Roles::Administrator->value
-                            && Auth::id() !== $record->tutor1_id
-                            && Auth::id() !== $record->tutor2_id
-                            && $record->end > Carbon::now()
-                            && !$alreadySubscribed
-                            && self::canChange($record);
-                    })
+                    ->visible(fn (Creneaux $record) => self::canSubscribe($record, $userId))
                     ->action(function (array $data, Creneaux $record) use ($userId) {
-                        Inscription::create([
-                            'tutee_id' => $userId,
-                            'creneau_id' => $record->id,
-                            'enseignements_souhaites' => json_encode($data['enseignements_souhaites']),
-                        ]);
+                        // Filament ne revérifie pas visible() côté serveur : on revérifie sous verrou
+                        DB::transaction(function () use ($data, $record, $userId) {
+                            $creneau = Creneaux::lockForUpdate()->findOrFail($record->id)
+                                ->load('inscriptions')
+                                ->loadCount('inscriptions');
+                            abort_unless(self::canSubscribe($creneau, $userId), 403);
+
+                            Inscription::create([
+                                'tutee_id' => $userId,
+                                'creneau_id' => $creneau->id,
+                                'enseignements_souhaites' => json_encode($data['enseignements_souhaites']),
+                            ]);
+                        });
                     }),
                 Action::make('se_desinscrire')
                     ->label(__('resources.common.buttons.se_desinscrire'))
@@ -436,6 +449,7 @@ class InscriptionCreneauResource extends Resource
                                self::canChange($record);
                     })
                     ->action(function (Creneaux $record) use ($userId) {
+                        abort_unless(self::canChange($record), 403);
                         $record->inscriptions()->where('tutee_id', $userId)->delete();
                     }),
                 Action::make('viewRegistrations')
@@ -445,18 +459,19 @@ class InscriptionCreneauResource extends Resource
                     ->modalHeading(__('resources.inscription_creneau.modal_heading'))
                     ->modalButton(__('resources.common.buttons.close'))
                     ->modalCancelAction(false)
-                    ->visible(fn (Creneaux $record) => $record->inscriptions_count > 0)
+                    ->visible(fn (Creneaux $record) => $record->inscriptions_count > 0 && self::canViewRegistrations($record))
                     ->modalContent(function (Creneaux $record) {
+                        abort_unless(self::canViewRegistrations($record), 403);
                         $html = '<ul class="space-y-2">';
 
                         foreach ($record->inscriptions as $inscription) {
                             $user = $inscription->tutee;
-                            $uvs = collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
+                            $uvs = e(collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
                                 ->sort()
-                                ->implode(', ');
+                                ->implode(', '));
 
                             $html .= "<li>
-                                        <strong>• {$user->firstName} {$user->lastName}</strong> : {$uvs}<br>
+                                        <strong>• " . e($user->firstName) . ' ' . e($user->lastName) . "</strong> : {$uvs}<br>
                                       </li>";
                         }
 

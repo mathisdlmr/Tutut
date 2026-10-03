@@ -135,12 +135,12 @@ class TutorCreneauxTableWidget extends BaseWidget
 
                     foreach ($record->inscriptions as $inscription) {
                         $user = $inscription->tutee;
-                        $uvs = collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
+                        $uvs = e(collect(json_decode($inscription->enseignements_souhaites ?? '[]'))
                             ->sort()
-                            ->implode(', ');
+                            ->implode(', '));
 
                         $html .= "<li>
-                                    <strong>• {$user->firstName} {$user->lastName}</strong> : {$uvs}<br>
+                                    <strong>• " . e($user->firstName) . ' ' . e($user->lastName) . "</strong> : {$uvs}<br>
                                   </li>";
                     }
 

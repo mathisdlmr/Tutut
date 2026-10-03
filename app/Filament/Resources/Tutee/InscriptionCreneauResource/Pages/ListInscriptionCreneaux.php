@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -417,7 +418,7 @@ class ListInscriptionCreneaux extends ListRecords
                                 $sheet->setCellValue(Coordinate::stringFromColumnIndex(1 + $colOffset) . $localRowIndex, 'UVs proposées:');
 
                                 $uvs = $creneau->tutor1->proposedUvs->pluck('code')->sort()->implode(', ');
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex, $uvs);
+                                $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex, $uvs, DataType::TYPE_STRING);
                                 $sheet->mergeCells(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex . ':' . Coordinate::stringFromColumnIndex(4 + $colOffset) . $localRowIndex);
                                 $localRowIndex++;
                             }
@@ -436,7 +437,7 @@ class ListInscriptionCreneaux extends ListRecords
                                     $sheet->setCellValue(Coordinate::stringFromColumnIndex(1 + $colOffset) . $localRowIndex, 'UVs proposées:');
 
                                     $uvs = $creneau->tutor2->proposedUvs->pluck('code')->sort()->implode(', ');
-                                    $sheet->setCellValue(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex, $uvs);
+                                    $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex, $uvs, DataType::TYPE_STRING);
                                     $sheet->mergeCells(Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex . ':' . Coordinate::stringFromColumnIndex(4 + $colOffset) . $localRowIndex);
                                     $localRowIndex++;
                                 }
@@ -459,12 +460,12 @@ class ListInscriptionCreneaux extends ListRecords
                             $tuteeRowsWritten = 0;
                             foreach ($creneau->inscriptions as $inscription) {
                                 $tutee = $inscription->tutee;
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex(1 + $colOffset) . $localRowIndex, $tutee->firstName . ' ' . $tutee->lastName);
+                                $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(1 + $colOffset) . $localRowIndex, $tutee->firstName . ' ' . $tutee->lastName, DataType::TYPE_STRING);
                                 $sheet->mergeCells(Coordinate::stringFromColumnIndex(1 + $colOffset) . $localRowIndex . ':' . Coordinate::stringFromColumnIndex(2 + $colOffset) . $localRowIndex);
 
                                 // UVs du Tutee
                                 $uvsSouhaites = collect(json_decode($inscription->enseignements_souhaites ?? '[]'))->sort()->implode(', ');
-                                $sheet->setCellValue(Coordinate::stringFromColumnIndex(3 + $colOffset) . $localRowIndex, $uvsSouhaites);
+                                $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(3 + $colOffset) . $localRowIndex, $uvsSouhaites, DataType::TYPE_STRING);
                                 $sheet->mergeCells(Coordinate::stringFromColumnIndex(3 + $colOffset) . $localRowIndex . ':' . Coordinate::stringFromColumnIndex(4 + $colOffset) . $localRowIndex);
 
                                 $localRowIndex++;

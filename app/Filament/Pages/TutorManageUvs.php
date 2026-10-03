@@ -206,6 +206,8 @@ class TutorManageUvs extends Page implements Forms\Contracts\HasForms, Tables\Co
                 ->body(__('resources.pages.tutor_manage_uvs.notifications.uvs_added_body'))
                 ->send();
         } elseif (!empty($data['code']) && !empty($data['intitule'])) {
+            abort_unless(Auth::user()->role === Roles::EmployedPrivilegedTutor->value, 403);
+
             $uv = UV::firstOrCreate(
                 ['code' => $data['code']],
                 ['intitule' => $data['intitule']]
