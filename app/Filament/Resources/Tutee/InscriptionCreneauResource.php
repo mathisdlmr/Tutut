@@ -209,7 +209,40 @@ class InscriptionCreneauResource extends Resource
             && $userId !== $record->tutor2_id
             && $record->end > Carbon::now()
             && !$alreadySubscribed
-            && self::canChange($record);
+            && self::canChange($record)
+            && self::availableUvs($record)->isNotEmpty();
+    }
+
+    /**
+     * UVs encore ouvertes à l'inscription sur un créneau
+     *
+     * Une UV proposée par un seul tuteur est limitée par la charge de ce tuteur : si il y a déjà 
+     * maxStudentFor1Tutor inscrits à des UVs proposées uniquement par un tuteur, on ferme les inscriptions
+     * Une UV proposée par les deux tuteurs n'est limitée que par le total du créneau.
+     */
+    public static function availableUvs(Creneaux $record): Collection
+    {
+        $settings = self::getSettings();
+        $max1 = isset($settings['maxStudentFor1Tutor']) ? intval($settings['maxStudentFor1Tutor']) : 6;
+
+        $uvs1 = $record->tutor1?->proposedUvs->pluck('code') ?? collect();
+        $uvs2 = $record->tutor2?->proposedUvs->pluck('code') ?? collect();
+        $requested = $record->inscriptions
+            ->map(fn ($inscription) => collect(json_decode($inscription->enseignements_souhaites ?? '[]')));
+
+        // Lambda qui reçoit une liste d'UVs et retourne vrai si l'un des tutors a déjà atteint le nombre maximal d'inscrits
+        $full = fn (Collection $only) => $requested
+            ->filter(fn ($uvs) => $uvs->intersect($only)->isNotEmpty())
+            ->count() >= $max1;
+
+        // UVs uniques des deux tutors
+        $only1 = $uvs1->diff($uvs2); // Les UVs que tutor1 fait mais pas tutor2
+        $only2 = $uvs2->diff($uvs1);
+
+
+        return $uvs1->merge($uvs2)->unique()->values() // Toutes les UVs proposées
+            ->reject(fn ($code) => ($only1->contains($code) && $full($only1)) || ($only2->contains($code) && $full($only2))) // On retire une UV si elle est exclusive au tutor1 et qu'il est plein, ou l'inverse
+            ->values();
     }
 
     /**
@@ -418,7 +451,7 @@ class InscriptionCreneauResource extends Resource
                                             $uv->code => "{$uv->code} - {$uv->intitule}"
                                         ])
                                     )
-                                    ->unique()
+                                    ->only(self::availableUvs($record)->all())
                             )
                             ->placeholder('Choisissez vos UVs')
                             ->maxItems(3),
@@ -428,9 +461,13 @@ class InscriptionCreneauResource extends Resource
                         // Filament ne revérifie pas visible() côté serveur : on revérifie sous verrou
                         DB::transaction(function () use ($data, $record, $userId) {
                             $creneau = Creneaux::lockForUpdate()->findOrFail($record->id)
-                                ->load('inscriptions')
+                                ->load(['inscriptions', 'tutor1.proposedUvs', 'tutor2.proposedUvs'])
                                 ->loadCount('inscriptions');
                             abort_unless(self::canSubscribe($creneau, $userId), 403);
+                            abort_unless(
+                                collect($data['enseignements_souhaites'])->diff(self::availableUvs($creneau))->isEmpty(),
+                                403
+                            );
 
                             Inscription::create([
                                 'tutee_id' => $userId,
