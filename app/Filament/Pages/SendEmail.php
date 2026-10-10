@@ -164,7 +164,7 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
         $users = User::whereIn('role', $this->roles)->get();
 
         foreach ($users as $user) {
-            Mail::raw(strip_tags($this->content), function ($message) use ($user) {
+            Mail::html($this->content, function ($message) use ($user) {
                 $message->to($user->email)
                         ->subject($this->mailTitle);
             });
