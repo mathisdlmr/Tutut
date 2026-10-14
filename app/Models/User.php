@@ -11,10 +11,11 @@ class User extends Authenticatable implements HasName
 {
     use HasFactory;
 
-    protected $fillable = ['email', 'firstName', 'lastName', 'role', 'languages', 'rgpd_accepted_at'];
+    protected $fillable = ['email', 'firstName', 'lastName', 'role', 'languages', 'rgpd_accepted_at', 'accepts_emails'];
 
     protected $casts = [
         'languages' => 'array',
+        'accepts_emails' => 'boolean',
     ];
 
     public function getFilamentName(): string

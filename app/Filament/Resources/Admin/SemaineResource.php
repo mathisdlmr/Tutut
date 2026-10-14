@@ -79,7 +79,7 @@ class SemaineResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return Semaine::where('fk_semestre', Semestre::getActive()->code)->count();
+        return Semestre::getActive()? Semaine::where('fk_semestre', Semestre::getActive()->code)->count() : null;
     }
 
     /**

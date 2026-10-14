@@ -19,6 +19,7 @@ use App\Filament\Resources\Tutor\CreneauResource as TutorCreneauResource;
 use App\Filament\Resources\Tutor\FeedbackResource as TutorFeedbackResource;
 use App\Filament\Resources\Tutor\TutorApplicationResource;
 use App\Filament\Widgets\AdminWidget;
+use App\Filament\Widgets\EmailSubscriptionWidget;
 use App\Filament\Widgets\TuteeCreneauxWidget;
 use App\Filament\Widgets\TutorCreneauxTableWidget;
 use App\Http\Middleware\EnsureRgpdAccepted;
@@ -110,6 +111,7 @@ class AdminPanelProvider extends PanelProvider
                 TutorCreneauxTableWidget::class,
                 TuteeCreneauxWidget::class,
                 AdminWidget::class,
+                EmailSubscriptionWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

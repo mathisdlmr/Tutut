@@ -7,6 +7,7 @@ use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\{Grid, RichEditor, Select, TextInput};
 use Filament\Notifications\Notification;
+use Filament\Pages\Dashboard;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -161,10 +162,13 @@ class SendEmail extends Page implements Forms\Contracts\HasForms
             return;
         }
 
-        $users = User::whereIn('role', $this->roles)->get();
+        $users = User::whereIn('role', $this->roles)->where('accepts_emails', true)->get();
+
+        $content = $this->content . '<hr><p style="font-size:12px"><a href="' . e(Dashboard::getUrl()) . '">'
+            . e(__('resources.pages.send_email.unsubscribe_footer')) . '</a></p>';
 
         foreach ($users as $user) {
-            Mail::html($this->content, function ($message) use ($user) {
+            Mail::html($content, function ($message) use ($user) {
                 $message->to($user->email)
                         ->subject($this->mailTitle);
             });

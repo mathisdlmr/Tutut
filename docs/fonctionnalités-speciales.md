@@ -277,6 +277,21 @@ public static function checkAvailability($date, $salle_id)
 }
 ```
 
+## Désinscription des mails
+
+Chaque utilisateur peut refuser de recevoir les mails envoyés depuis la page **Envoyer un mail** (champ booléen `accepts_emails` de la table `users`, `true` par défaut).
+
+- Le widget `EmailSubscriptionWidget` du tableau de bord affiche l'état actuel et un bouton « Se désinscrire » / « Se réinscrire ».
+- `SendEmail::sendEmail()` n'envoie qu'aux utilisateurs avec `accepts_emails = true`.
+- Chaque mail envoyé contient en pied de page un lien « Se désinscrire de la newsletter depuis le tableau de bord du site » pointant vers le tableau de bord.
+
+Mise à jour de la base en production (cf. [deploiement.md](deploiement.md)) :
+
+```sql
+ALTER TABLE users ADD COLUMN accepts_emails BOOLEAN NOT NULL DEFAULT TRUE;
+INSERT INTO migrations (migration, batch) VALUES ('0150_add_accepts_emails_to_users', (SELECT COALESCE(MAX(batch), 0) + 1 FROM migrations));
+```
+
 ## Protection RGPD
 
 L'application inclut un middleware `EnsureRgpdAccepted` qui vérifie que l'utilisateur a accepté les conditions RGPD avant d'accéder au système.

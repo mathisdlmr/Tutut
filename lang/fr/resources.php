@@ -344,6 +344,13 @@ return [
         ],
     ],
     'widgets' => [
+        'email_subscription' => [
+            'heading' => 'Inscription à la newsletter',
+            'subscribed' => 'Vous recevez les mails envoyés par l\'équipe Tutut !',
+            'unsubscribed' => 'Vous ne recevez plus les mails envoyés par l\'équipe Tutut :(',
+            'unsubscribe' => 'Se désinscrire',
+            'subscribe' => 'Se réinscrire',
+        ],
         'admin' => [
             'stats' => [
                 'avg_tutees_per_night' => 'Moyenne de tutoré.e.s / soir',
@@ -442,6 +449,7 @@ return [
                 'save_template' => 'Enregistrer comme template',
                 'delete_template' => 'Supprimer le template',
             ],
+            'unsubscribe_footer' => 'Se désinscrire de la newsletter depuis le tableau de bord du site',
             'notifications' => [
                 'error_title' => 'Erreur',
                 'error_select_role' => 'Veuillez sélectionner au moins un rôle.',

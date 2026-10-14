@@ -28,6 +28,7 @@ Le schéma de la base de données s'articule autour de plusieurs entités princi
 - `role` : Rôle de l'utilisateur (enum des valeurs définies dans `App\Enums\Roles`)
 - `languages` : Langues maîtrisées (JSON)
 - `rgpd_accepted_at` : Date d'acceptation RGPD
+- `accepts_emails` : Consentement à recevoir les mails envoyés depuis la page "Envoyer un mail" (booléen, `true` par défaut)
 - Relations:
   - `proposedUvs()`: UVs proposées par un tuteur
   - `heuresSupplementaires()`: Heures supplémentaires du tuteur
@@ -40,10 +41,11 @@ class User extends Authenticatable implements HasName
 {
     use HasFactory;
 
-    protected $fillable = ['email', 'firstName', 'lastName', 'role', 'languages', 'rgpd_accepted_at'];
+    protected $fillable = ['email', 'firstName', 'lastName', 'role', 'languages', 'rgpd_accepted_at', 'accepts_emails'];
 
     protected $casts = [
         'languages' => 'array',
+        'accepts_emails' => 'boolean',
     ];
 
     public function getFilamentName(): string

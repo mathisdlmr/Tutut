@@ -344,6 +344,13 @@ return [
         ],
     ],
     'widgets' => [
+        'email_subscription' => [
+            'heading' => 'Newsletter Subscription',
+            'subscribed' => 'You receive emails sent by the Tutut team !',
+            'unsubscribed' => 'You no longer receive emails sent by the Tutut team :(',
+            'unsubscribe' => 'Unsubscribe',
+            'subscribe' => 'Subscribe again',
+        ],
         'admin' => [
             'stats' => [
                 'avg_tutees_per_night' => 'Average tutees / night',
@@ -442,6 +449,7 @@ return [
                 'save_template' => 'Save as template',
                 'delete_template' => 'Delete template',
             ],
+            'unsubscribe_footer' => 'Unsubscribe from the newsletter from the website dashboard',
             'notifications' => [
                 'error_title' => 'Error',
                 'error_select_role' => 'Please select at least one role.',

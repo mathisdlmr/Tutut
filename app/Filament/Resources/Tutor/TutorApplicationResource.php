@@ -72,6 +72,9 @@ class TutorApplicationResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
+        if(!Semestre::getActive()) {
+            return null;
+        }
         $pendingRequest = BecomeTutor::where('semester', Semestre::getActive()->code)->where('status', 'pending')->count();
         return $pendingRequest > 0 ? $pendingRequest : null;
     }
