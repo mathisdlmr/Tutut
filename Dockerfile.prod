@@ -51,6 +51,10 @@ COPY prod/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY prod/laravel-entrypoint.sh /usr/local/bin/laravel-entrypoint.sh
 RUN chmod +x /usr/local/bin/laravel-entrypoint.sh
 
+# 21/10/2026 : disable php session.upload_progress to avoid security issues
+# https://www.it-connect.fr/php-failles-critiques-rce-cve-2026-109618-cve-2026-109619/
+RUN sed -i 's/session.upload_progress.enabled = On/session.upload_progress.enabled = Off/' /usr/local/etc/php/php.ini-production
+
 # Remove default nginx config to free port 80
 RUN rm -f /etc/nginx/sites-enabled/default
 
