@@ -230,9 +230,7 @@ class ListInscriptionCreneaux extends ListRecords
 
             // Si on doit afficher la semaine pro, on la récupère
             if ($showNextWeek) {
-                $nextWeek = Semaine::where('numero', $currentWeek->numero + 1)
-                    ->where('fk_semestre', $currentWeek->fk_semestre)
-                    ->first();
+                $nextWeek = $currentWeek->nextWeek();
 
                 // Puis on la formate et on l'affiche
                 if ($nextWeek) {

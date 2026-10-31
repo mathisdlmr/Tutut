@@ -25,6 +25,19 @@ class Semaine extends Model
         'is_vacances'
     ];
 
+    /**
+     * Retourne la semaine prochaine, qui n'est PAS une semaine de vacances
+     * Si la semaine prochaine est une semaine de vacances, on prend la première semaine suivante qui n'en est pas une
+     */
+    public function nextWeek(): ?self
+    {
+        return static::where('fk_semestre', $this->fk_semestre)
+            ->where('numero', '<>', 'X')
+            ->where('date_debut', '>', $this->date_debut)
+            ->orderBy('date_debut')
+            ->first();
+    }
+
     public function semestre()
     {
         return $this->belongsTo(Semestre::class, 'fk_semestre', 'code');

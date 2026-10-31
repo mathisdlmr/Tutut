@@ -277,6 +277,7 @@ class SemaineResource extends Resource
                             $semestre = Semestre::where('code', $record->fk_semestre)->first();
                             $previousWeek = Semaine::where('fk_semestre', $semestre->code)
                                 ->where('date_fin', '<', $record->date_debut)
+                                ->where('numero', '<>', 'X')
                                 ->orderByDesc('date_fin')
                                 ->first();
                             $newNumero = $previousWeek ? $previousWeek->numero + 1 : 1;

@@ -134,9 +134,7 @@ class ListCreneau extends ListRecords
                 });
 
             if ($showNextWeek) {
-                $nextWeek = Semaine::where('numero', $currentWeek->numero + 1)
-                    ->where('fk_semestre', $currentWeek->fk_semestre)
-                    ->first();
+                $nextWeek = $currentWeek->nextWeek();
 
                 if ($nextWeek) {
                     $tabs["semaine-{$nextWeek->id}"] = Tab::make(__('resources.inscription_creneau.semaine_prochaine')." ({$nextWeek->numero})")

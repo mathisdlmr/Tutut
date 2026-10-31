@@ -275,9 +275,7 @@ class CreneauResource extends Resource
             ->first();
 
         if ($currentWeek) {
-            $nextWeek = Semaine::where('numero', $currentWeek->numero + 1)
-                ->where('fk_semestre', $currentWeek->fk_semestre)
-                ->first();
+            $nextWeek = $currentWeek->nextWeek();
 
             if ($showNextWeek && $nextWeek) {
                 $query->whereIn('fk_semaine', [$currentWeek->id, $nextWeek->id]);
